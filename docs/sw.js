@@ -1,5 +1,5 @@
 // 離線快取：網路優先（3 秒逾時退回快取）；頁面是靜態的，沒有任何使用者資料
-const V = 'rbc-v18';
+const V = 'rbc-v19';
 const FILES = ['./', 'index.html', 'start.html', 'ride.html', 'turn.html', 'post.html', 'coach.html', 'rsi.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'gate.js', 'motion.css', 'layout.css', 'swipe.js', 'motion.js', 'bridge.js', 'bridge_fixtures.js',
   'fixtures/status_ok.json', 'fixtures/status_band_unconfirmed.json', 'fixtures/status_coach_silent.json', 'fixtures/status_riding.json', 'fixtures/status_bridge_down.json',
   'fixtures/rsi_ok.json', 'fixtures/rsi_empty.json', 'fixtures/rsi_unavailable.json'];

@@ -561,8 +561,23 @@
     d.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('button[data-r-act]');
       if (!b || b.disabled) return;
-      ctx.msgs[b.getAttribute('data-id')] = decide;
-      if (ctx.last) rsiRender(ctx.last, ctx);
+      var id = b.getAttribute('data-id'), kind = b.getAttribute('data-r-act');
+      if (mode !== 'local') { ctx.msgs[id] = decide; if (ctx.last) rsiRender(ctx.last, ctx); return; }
+      // 本機樞紐：只送「意圖」，樞紐只 append 一行，不執行；失敗就照實說
+      var tok = '', note2 = '';
+      try { tok = root.sessionStorage.getItem('rbc_tok') || ''; } catch (x) {}
+      if (!tok) { tok = (root.prompt && root.prompt('貼上手機 hub_pair.txt 裡的配對碼（只在這次開啟期間記住）')) || ''; tok = tok.trim(); }
+      if (!tok) { ctx.msgs[id] = '沒有配對碼，沒有送出。'; if (ctx.last) rsiRender(ctx.last, ctx); return; }
+      if (kind === 'note') { note2 = (root.prompt && root.prompt('備註（最多 200 字）')) || ''; if (!note2) return; }
+      ctx.msgs[id] = '送出中…'; if (ctx.last) rsiRender(ctx.last, ctx);
+      (opts.fetchImpl || root.fetch)(RSI_LOCAL_URL.replace('/v1/rsi', '/v1/intent'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({ kind: kind, target: id, note: note2 })
+      }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); }).then(function (o) {
+        if (o.s === 200 && o.j && o.j.ok) { try { root.sessionStorage.setItem('rbc_tok', tok); } catch (x) {} ctx.msgs[id] = '已記下（' + o.j.id + '）。這只是你的決定，教練還沒執行，由手機 CLI 處理。'; }
+        else if (o.s === 401) { try { root.sessionStorage.removeItem('rbc_tok'); } catch (x) {} ctx.msgs[id] = '配對碼不對，沒有送出。'; }
+        else ctx.msgs[id] = '沒有送出（' + o.s + ' ' + ((o.j && o.j.error) || '') + '）。';
+      }, function () { ctx.msgs[id] = '連不到手機樞紐，沒有送出。'; }).then(function () { if (ctx.last) rsiRender(ctx.last, ctx); });
     });
     var src = function (extra) {
       var s = d.querySelector('[data-r="source"]');
