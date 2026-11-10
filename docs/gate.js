@@ -52,9 +52,27 @@
     firebase.initializeApp(CFG);
     var auth = firebase.auth();
 
+    // 登出鈕：登入後固定在右上角（每頁都有）。
+    // 登入狀態是整個 scatjay.github.io 共用的（含文化遊戲松後台），所以這裡一定要能登出。
+    function addLogout(email) {
+      if (document.getElementById('gOut')) return;
+      var b = document.createElement('button');
+      b.id = 'gOut'; b.type = 'button';
+      b.title = '目前登入：' + email;
+      b.textContent = '登出';
+      b.style.cssText = 'position:fixed;top:6px;right:6px;z-index:99998;min-width:56px;height:44px;padding:0 12px;' +
+        "border:2px solid #bdbdbd;background:rgba(11,11,12,.85);color:#bdbdbd;font-size:16px;font-weight:700;font-family:'Noto Sans TC',system-ui,sans-serif";
+      b.addEventListener('click', function () {
+        b.disabled = true;
+        auth.signOut().catch(function (err) { b.disabled = false; explain(err); });
+      });
+      document.body.appendChild(b);
+    }
+    function removeLogout() { var b = document.getElementById('gOut'); if (b) b.remove(); }
+
     function accept(user) {
       var email = ((user && user.email) || '').toLowerCase();
-      if (ALLOW.indexOf(email) >= 0) { unlock(); return true; }
+      if (ALLOW.indexOf(email) >= 0) { unlock(); addLogout(email); return true; }
       try { auth.signOut(); } catch (e) {}
       showGate();
       say('這個帳號（' + email + '）不在名單內。要加人請改 docs/gate.js 的 ALLOW。');
@@ -80,7 +98,13 @@
     }
 
     auth.getRedirectResult().catch(explain);          // 轉頁回來的那一次接住結果
-    auth.onAuthStateChanged(function (u) { if (u) accept(u); else showGate(); });
+    var wasIn = false;
+    auth.onAuthStateChanged(function (u) {
+      if (u) { wasIn = true; accept(u); return; }
+      removeLogout(); showGate();
+      if (wasIn) say('已登出。');
+      wasIn = false;
+    });
 
     document.addEventListener('click', function (e) {
       if (!e.target || e.target.id !== 'gLogin') return;
