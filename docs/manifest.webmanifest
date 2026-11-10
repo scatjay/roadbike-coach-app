@@ -1,6 +1,6 @@
 {
-  "name": "公路車教練",
-  "short_name": "公路車教練",
+  "name": "146",
+  "short_name": "146",
   "lang": "zh-Hant",
   "start_url": "./index.html",
   "scope": "./",
@@ -33,5 +33,6 @@
       "type": "image/svg+xml",
       "purpose": "any"
     }
-  ]
+  ],
+  "description": "公路車教練：心率守 146，看今天週幾、怎麼騎"
 }
