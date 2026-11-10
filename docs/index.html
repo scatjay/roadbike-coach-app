@@ -23,10 +23,11 @@
 <div style="font-size:28px;font-weight:900;color:#c6ff00">去程別衝</div>
 </div>
 <div class="m-in" style="--i:2;color:#bdbdbd;font-size:18px;line-height:1.6;margin-top:8px">車表到吉安宮再開 · 踏頻器出門前轉一下曲柄<br>香蕉帶了嗎</div>
+<div class="m-in" data-b="home-strip" style="--i:3;color:#bdbdbd;font-size:18px;line-height:1.6">橋接：示意<br>踏頻器：待喚醒（出門前轉一下曲柄）</div>
 <div style="flex-grow:1"></div>
-<div id="ok" class="m-in" style="display:none;color:#c6ff00;font-size:28px;font-weight:900">已送出，看手環有沒有震</div>
+<div id="ok" class="m-in" style="display:none;color:#c6ff00;font-size:28px;font-weight:900" data-b="ok">已送出，看手環有沒有震</div>
 <button id="b" type="button" class="m-press" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900">震一下手環</button>
-<div style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
+<div data-b="source" data-b-prefix="處方數字為示意 · " style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
 </div>
 <nav style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:4px solid #c6ff00;background:#141416;height:64px;font-size:18px"><a href="index.html" style="display:flex;align-items:center;justify-content:center;background:#c6ff00;color:#0b0b0c;font-weight:900">今天</a><a href="ride.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">路上</a><a href="post.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">騎後</a><a href="coach.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">問教練</a></nav>
 </div>
@@ -34,6 +35,8 @@
 document.getElementById('b').onclick=function(){document.getElementById('ok').style.display='block';this.style.display='none'}
 </script>
 <script src="motion.js"></script>
+<script src="bridge_fixtures.js"></script>
+<script src="bridge.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="gate.js"></script>

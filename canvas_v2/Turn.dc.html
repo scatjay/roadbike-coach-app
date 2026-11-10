@@ -37,12 +37,12 @@ html:not(.locked) .m-pulse{transform-origin:left center;animation:m-pulse 360ms 
 <div style="width:390px;height:844px;box-sizing:border-box;background:#0b0b0c;color:#ffffff;font-family:'Noto Sans TC',system-ui,sans-serif;display:flex;flex-direction:column">
 <div style="flex-grow:1;padding:28px 20px 16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
 <div style="display:flex;gap:8px"><a href="Start.dc.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">出發點</a><a href="Ride.dc.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">騎乘中</a><a href="Turn.dc.html" style="padding:4px 14px;border:2px solid;font-size:18px;background:#c6ff00;color:#0b0b0c;font-weight:900;border-color:#c6ff00">折返點</a></div>
-<div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px">折返點 · 已停 12 分 · 休息通常約 36 分</div>
+<div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px">折返點 · 通道檢查</div>
 <div class="m-in" style="--i:1;flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:14px">
 <div style="color:#bdbdbd;font-size:28px;font-weight:700">{{ labText }}</div>
-<div style="display:{{ goodShow }};font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line">順風
-<span style="color:#c6ff00">剩 19.9 k</span></div>
-<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15;transform-origin:left center;animation:m-pulse 360ms cubic-bezier(.2,.8,.2,1) 3"><span style="color:#ff8a5c">手環沒回應</span></div>
+<div style="display:{{ goodShow }};font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line">教練與車表
+<span style="color:#c6ff00">在線</span></div>
+<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15;transform-origin:left center;animation:m-pulse 360ms cubic-bezier(.2,.8,.2,1) 3"><span style="color:#ff8a5c">教練沒回應</span></div>
 <div style="font-size:20px;color:#bdbdbd;line-height:1.6;white-space:pre-line">{{ subText }}</div>
 </div>
 <div style="display:{{ actShow }};flex-direction:column;gap:8px">
@@ -64,7 +64,7 @@ class Component extends DCLogic {
       labText: b ? '先處理' : '回程',
       goodShow: b ? 'none' : 'block',
       badShow: b ? 'block' : 'none',
-      subText: b ? '回程提示會先走車表與語音' : '去程 22.7 km/h（頂風）· 心率 141\n手環 車表 在線',
+      subText: b ? '回程提示會先走車表與語音' : '回程建議請看車表／語音',
       actShow: b ? 'flex' : 'none',
       okShow: this.state.sent ? 'block' : 'none',
       send: () => this.setState({ sent: true }),

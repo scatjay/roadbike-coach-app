@@ -56,8 +56,8 @@ class Component extends DCLogic {
   renderVals() {
     const b = this.state.bad;
     return {
-      msgText: b ? '手環 9 分鐘沒回應' : '教練在線',
-      subText: b ? '上一次震動確認是 9 分鐘前' : '最後一則提示 4 分鐘前 · 手環',
+      msgText: b ? '教練沒回應' : '教練在線',
+      subText: b ? '已靜默 6 分鐘' : '車表最後推送 41 秒前',
       msgColor: b ? '#ff8a5c' : '#c6ff00',
       msgAnim: b ? 'm-pulse 360ms cubic-bezier(.2,.8,.2,1) 3' : 'none',
       okShow: this.state.sent ? 'block' : 'none',

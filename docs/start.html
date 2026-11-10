@@ -19,25 +19,27 @@
 <div style="display:flex;gap:8px"><a href="start.html" style="padding:4px 14px;border:2px solid;font-size:18px;background:#c6ff00;color:#0b0b0c;font-weight:900;border-color:#c6ff00">出發點</a><a href="ride.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">騎乘中</a><a href="turn.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">折返點</a></div>
 <div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px">吉安宮 · 車表剛開 · 收進口袋前最後一眼</div>
 <div class="m-in" style="--i:1;flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
-<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">全綠<br>可以收進口袋</div>
-<details style="font-size:18px;color:#bdbdbd"><summary style="padding:6px 0">哪四項</summary>
-<div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>教練</span><span style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>心率帶＋踏頻器</span><span style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>手環</span><span style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>車表</span><span style="color:#c6ff00">✓</span></div>
+<div id="msg" data-b="main" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">教練與感測器正常<br>手環請確認</div>
+<div data-b="detail" data-b-full="1" style="font-size:18px;color:#bdbdbd;line-height:1.5">手環沒有讀值能證明，請震一下確認。</div>
+<details data-b="details" data-b-full="1" style="font-size:18px;color:#bdbdbd"><summary style="padding:6px 0">哪四項</summary>
+<div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>教練</span><span data-b="row-coach" style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>心率帶＋踏頻器</span><span data-b="row-sensor" style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>手環</span><span data-b="row-band" style="color:#bdbdbd">？ 請確認</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>車表</span><span data-b="row-headunit" style="color:#c6ff00">✓</span></div>
 </details>
 </div>
-<div id="ok" class="m-in" style="display:none;color:#c6ff00;font-size:28px;font-weight:900">已送出，看手環與車表</div>
-<button id="b" type="button" class="m-press" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900">震一下，確認手環與車表</button>
-<button id="t" type="button" style="border:0;background:transparent;color:#bdbdbd;font-size:14px;height:24px">（畫板用：切換異常）</button>
-<div style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
+<div id="ok" class="m-in" style="display:none;color:#c6ff00;font-size:28px;font-weight:900" data-b="ok">已送出，看手環與車表</div>
+<button id="b" type="button" class="m-press" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900" data-b-full="1">震一下，確認手環與車表</button>
+<div data-b="source" style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
 </div>
 <nav style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:4px solid #c6ff00;background:#141416;height:64px;font-size:18px"><a href="index.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">今天</a><a href="ride.html" style="display:flex;align-items:center;justify-content:center;background:#c6ff00;color:#0b0b0c;font-weight:900">路上</a><a href="post.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">騎後</a><a href="coach.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">問教練</a></nav>
 </div>
 <script>
 var bad=false;
 document.getElementById('b').onclick=function(){document.getElementById('ok').style.display='block'};
-document.getElementById('t').onclick=function(){bad=!bad;var m=document.getElementById('msg');
-m.innerHTML=bad?'車表沒回應<br>先叫醒它':'全綠<br>可以收進口袋';m.style.color=bad?'#ff8a5c':'#c6ff00';m.classList.toggle('m-pulse',bad);};
+var tg=document.getElementById('t');if(tg)tg.onclick=function(){bad=!bad;var m=document.getElementById('msg');
+m.innerHTML=bad?'車表沒回應<br>先叫醒它':'教練與感測器正常<br>手環請確認';m.style.color=bad?'#ff8a5c':'#c6ff00';m.classList.toggle('m-pulse',bad);};
 </script>
 <script src="motion.js"></script>
+<script src="bridge_fixtures.js"></script>
+<script src="bridge.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="gate.js"></script>

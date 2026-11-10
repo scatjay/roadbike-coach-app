@@ -68,6 +68,8 @@ def conv(stem):
     t = (SRC / f"{stem}.dc.html").read_text(encoding="utf-8")
     title = re.search(r"<title>(.*?)</title>", t).group(1)
     body = t[t.index("<body>") + 6:t.index("<script>")].strip()
+    # data-b* 是網頁版 bridge.js 的綁定點；畫布版不跑 bridge.js（畫布不能用 getElementById/fetch），一律拿掉，內容維持示意
+    body = re.sub(r' data-b[\w-]*="[^"]*"', "", body)
     if stem == "Home":
         body = sub(body, OK_DIV, '<div class="m-in" style="display:{{ okShow }};')
         body = sub(body, SEND_BTN, '<button type="button" class="m-press" onClick="{{ send }}" style="display:{{ bShow }};')
@@ -83,16 +85,16 @@ def conv(stem):
         body = sub(body, SEND_BTN, '<button type="button" onClick="{{ send }}" style="')
         body = sub(body, TOGGLE, '<button type="button" onClick="{{ flip }}" style="')
         if stem == "Start":
-            body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">全綠<br>可以收進口袋</div>',
+            body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">教練與感測器正常<br>手環請確認</div>',
                        '<div style="font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line;color:{{ msgColor }};transform-origin:left center;animation:{{ msgAnim }}">{{ msgText }}</div>')
-            texts = "msgText: b ? '車表沒回應\\n先叫醒它' : '全綠\\n可以收進口袋',"
+            texts = "msgText: b ? '車表沒回應\\n先叫醒它' : '教練與感測器正常\\n手環請確認',"
         else:
             body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">教練在線</div>',
                        '<div style="font-size:56px;font-weight:900;line-height:1.15;color:{{ msgColor }};transform-origin:left center;animation:{{ msgAnim }}">{{ msgText }}</div>')
-            body = sub(body, '<div id="sub" style="font-size:24px;color:#bdbdbd;font-weight:700">最後一則提示 4 分鐘前 · 手環</div>',
+            body = sub(body, '<div id="sub" style="font-size:24px;color:#bdbdbd;font-weight:700">車表最後推送 41 秒前</div>',
                        '<div style="font-size:24px;color:#bdbdbd;font-weight:700">{{ subText }}</div>')
-            texts = ("msgText: b ? '手環 9 分鐘沒回應' : '教練在線',\n"
-                     "      subText: b ? '上一次震動確認是 9 分鐘前' : '最後一則提示 4 分鐘前 · 手環',")
+            texts = ("msgText: b ? '教練沒回應' : '教練在線',\n"
+                     "      subText: b ? '已靜默 6 分鐘' : '車表最後推送 41 秒前',")
         js = f"""class Component extends DCLogic {{
   constructor(props) {{ super(props); this.state = {{ bad: false, sent: false }}; }}
   renderVals() {{
@@ -113,10 +115,10 @@ def conv(stem):
         body = sub(body, TOGGLE, '<button type="button" onClick="{{ flip }}" style="')
         body = sub(body, '<div id="lab" style="color:#bdbdbd;font-size:28px;font-weight:700">回程</div>',
                    '<div style="color:#bdbdbd;font-size:28px;font-weight:700">{{ labText }}</div>')
-        body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15">順風<br><span style="color:#c6ff00">剩 19.9 k</span></div>',
-                   '<div style="display:{{ goodShow }};font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line">順風\n<span style="color:#c6ff00">剩 19.9 k</span></div>'
-                   '\n<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15;transform-origin:left center;animation:' + PULSE_ON + '"><span style="color:#ff8a5c">手環沒回應</span></div>')
-        body = sub(body, '<div id="sub" style="font-size:20px;color:#bdbdbd;line-height:1.6">去程 22.7 km/h（頂風）· 心率 141<br>手環 車表 在線</div>',
+        body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15">教練與車表<br><span style="color:#c6ff00">在線</span></div>',
+                   '<div style="display:{{ goodShow }};font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line">教練與車表\n<span style="color:#c6ff00">在線</span></div>'
+                   '\n<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15;transform-origin:left center;animation:' + PULSE_ON + '"><span style="color:#ff8a5c">教練沒回應</span></div>')
+        body = sub(body, '<div id="sub" style="font-size:20px;color:#bdbdbd;line-height:1.6">回程建議請看車表／語音</div>',
                    '<div style="font-size:20px;color:#bdbdbd;line-height:1.6;white-space:pre-line">{{ subText }}</div>')
         body = sub(body, '<div id="act" style="display:none;flex-direction:column;gap:8px">',
                    '<div style="display:{{ actShow }};flex-direction:column;gap:8px">')
@@ -128,7 +130,7 @@ def conv(stem):
       labText: b ? '先處理' : '回程',
       goodShow: b ? 'none' : 'block',
       badShow: b ? 'block' : 'none',
-      subText: b ? '回程提示會先走車表與語音' : '去程 22.7 km/h（頂風）· 心率 141\\n手環 車表 在線',
+      subText: b ? '回程提示會先走車表與語音' : '回程建議請看車表／語音',
       actShow: b ? 'flex' : 'none',
       okShow: this.state.sent ? 'block' : 'none',
       send: () => this.setState({ sent: true }),

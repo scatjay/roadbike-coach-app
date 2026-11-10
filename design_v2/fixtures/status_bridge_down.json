@@ -1,0 +1,34 @@
+{
+ "schema": 1,
+ "t": 1783000000.5,
+ "riding": false,
+ "bridge": {
+  "ok": false,
+  "proxy_ms": 3,
+  "error": "connect_refused"
+ },
+ "coach": {
+  "pid_alive": true,
+  "riding": false,
+  "state_age": null,
+  "last_decision_age": null,
+  "decisions_tail": []
+ },
+ "version": {
+  "deploy_log_head_age": null,
+  "agent_mtime_age": null,
+  "agent_start_age": null,
+  "consistent": null
+ },
+ "device": {
+  "battery": {
+   "pct": null,
+   "charging": null,
+   "age": null
+  },
+  "temp": {
+   "c": null,
+   "age": null
+  }
+ }
+}

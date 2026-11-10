@@ -1,6 +1,7 @@
 """把 design/*.dc.html（Claude Design 畫板）轉成 docs/ 的獨立網頁（GitHub Pages 發布資料夾）（可裝成手機 APP）。
 用法：python tools/build.py   （只用標準函式庫，結果可重跑、同輸入同輸出）
 """
+import json
 import re
 from pathlib import Path
 
@@ -106,6 +107,8 @@ V2_HEAD = (
 )
 V2_TAIL = (
     '<script src="motion.js"></script>\n'
+    '<script src="bridge_fixtures.js"></script>\n'
+    '<script src="bridge.js"></script>\n'
     '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>\n'
     '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>\n'
     '<script src="gate.js"></script>\n'
@@ -123,11 +126,41 @@ def convert_v2(stem: str) -> str:
     for k, v in V2.items():
         t = t.replace(f'href="{k}.dc.html"', f'href="{v}.html"')
     assert "dc.html" not in t and "width:390px" not in t, f"{stem} v2 還有未轉換的標記"
+    if stem in BRIDGE_PAGES:  # 這四頁由 bridge.js 填入真資料（或示意夾具）；「畫板用：切換異常」鈕只給畫板，網頁版拿掉
+        assert 'data-b="' in t, f"{stem} 沒有 data-b 綁定點"
+        t, n = re.subn(r'<button id="t" type="button"[^>]*>（畫板用：切換異常）</button>\n?', "", t)
+        assert n == (0 if stem == "Home" else 1), f"{stem} 切換異常鈕數量不對：{n}"
     assert t.count("</body>") == 1
     return t.replace("</body>", V2_TAIL)
 
 
+BRIDGE_PAGES = ("Home", "Start", "Ride", "Turn")
+FIXTURE_JS = """/* 由 tools/build.py 從 design_v2/fixtures/status_*.json 產生，不要手改。示意資料：沒有任何座標、位置或金鑰。
+ * 契約來源：公路車專案 phone-agent/hub_fixtures（schema:1）。 */
+(function (root, data) {
+  if (typeof module === 'object' && module.exports) module.exports = data; else root.BRIDGE_FIXTURES = data;
+})(typeof self !== 'undefined' ? self : this, %s);
+"""
+
+
+def build_fixtures():
+    """夾具：JSON 逐檔複製到 docs/fixtures/，並合成 docs/bridge_fixtures.js（bridge.js 的示意來源，離線也能用）。"""
+    (OUT / "fixtures").mkdir(parents=True, exist_ok=True)
+    data = {}
+    for p in sorted((ROOT / "design_v2" / "fixtures").glob("status_*.json")):
+        obj = json.loads(p.read_text(encoding="utf-8"))
+        assert obj.get("schema") == 1, f"{p.name} schema 不是 1"
+        blob = json.dumps(obj, ensure_ascii=False)
+        assert not re.search(r'"(lat|lon|lng|latitude|longitude|token|key|secret)"', blob, re.I), f"{p.name} 含座標或金鑰欄位"
+        data[p.stem[len("status_"):]] = obj
+        (OUT / "fixtures" / p.name).write_text(json.dumps(obj, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+    assert len(data) == 5, f"夾具應有 5 個，實際 {len(data)}"
+    (OUT / "bridge_fixtures.js").write_text(FIXTURE_JS % json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    print("寫出 bridge_fixtures.js 與 fixtures/", len(data), "個")
+
+
 def main():
+    build_fixtures()
     (OUT / "v1").mkdir(parents=True, exist_ok=True)
     for stem, name in NAMES.items():  # v1：保留在 /v1/
         (OUT / "v1" / f"{name}.html").write_text(convert(stem, up="../"), encoding="utf-8", newline="\n")

@@ -1,0 +1,74 @@
+{
+ "schema": 1,
+ "t": 1783000000.5,
+ "riding": false,
+ "bridge": {
+  "ok": true,
+  "proxy_ms": 12,
+  "health": {
+   "ok": true,
+   "t": 1783000000.123,
+   "coach": {
+    "silent_s": 12
+   },
+   "sensors": {
+    "hr_age": 0.9,
+    "cad_age": null,
+    "pw_age": null,
+    "conn_age": 0.4,
+    "scanning": false
+   },
+   "headunit": {
+    "tx": "送第 3/3 段",
+    "tx_age": 41.0,
+    "dev_n": 128,
+    "dev_age": 3.2
+   },
+   "location": {
+    "state": "ok",
+    "fgs_type": true,
+    "n": 55,
+    "age": 2.1
+   },
+   "band": {
+    "tx": 1,
+    "tx_age": 95.0
+   }
+  }
+ },
+ "coach": {
+  "pid_alive": true,
+  "riding": false,
+  "state_age": null,
+  "last_decision_age": 41.0,
+  "decisions_tail": [
+   {
+    "age": 41.0,
+    "type": "fire",
+    "text": "賽段 國姓橋"
+   },
+   {
+    "age": 160.0,
+    "type": "fire",
+    "text": "順風 心率141 守住"
+   }
+  ]
+ },
+ "version": {
+  "deploy_log_head_age": 7200.0,
+  "agent_mtime_age": 7500.0,
+  "agent_start_age": 3000.0,
+  "consistent": true
+ },
+ "device": {
+  "battery": {
+   "pct": 78,
+   "charging": true,
+   "age": 12.0
+  },
+  "temp": {
+   "c": 34.8,
+   "age": 12.0
+  }
+ }
+}
