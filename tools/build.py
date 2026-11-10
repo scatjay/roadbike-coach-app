@@ -32,7 +32,7 @@ BTN = ("height: 64px; border: 3px solid #ffffff; background: transparent; color:
        "font-weight: 900; font-family: 'Barlow Condensed', 'Noto Sans TC', system-ui, sans-serif")
 
 
-def convert(stem: str) -> str:
+def convert(stem: str, up: str = "") -> str:
     t = (SRC / f"{stem}.dc.html").read_text(encoding="utf-8")
     title = re.search(r"<title>(.*?)</title>", t).group(1)
     helmet = re.search(r"<helmet>(.*?)</helmet>", t, re.S).group(1)
@@ -74,8 +74,8 @@ def convert(stem: str) -> str:
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg">
+<link rel="manifest" href="{up}manifest.webmanifest">
+<link rel="icon" href="{up}icon.svg">
 <title>{title}</title>
 {helmet.strip()}
 <style>html,body{{background:#0b0b0c}}html.locked body>*:not(#gate){{visibility:hidden}}</style>
@@ -86,17 +86,52 @@ def convert(stem: str) -> str:
 {extra}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="gate.js"></script>
-<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){{}});</script>
+<script src="{up}gate.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('{up}sw.js').catch(function(){{}});</script>
 </body>
 </html>
 """
 
 
+V2 = {"Home": "index", "Start": "start", "Ride": "ride", "Turn": "turn", "Post": "post", "Coach": "coach"}
+
+V2_HEAD = (
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+    '<meta name="theme-color" content="#0b0b0c">\n'
+    '<link rel="manifest" href="manifest.webmanifest">\n'
+    '<link rel="icon" href="icon.svg">\n'
+    '<style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>\n'
+    '<script>document.documentElement.classList.add("locked")</script>'
+)
+V2_TAIL = (
+    '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>\n'
+    '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>\n'
+    '<script src="gate.js"></script>\n'
+    "<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});</script>\n"
+    "</body>"
+)
+
+
+def convert_v2(stem: str) -> str:
+    """v2 畫板本來就是獨立 HTML（不是 Design Component）：只需響應式外框、連結、登入閘門、離線快取。"""
+    t = (ROOT / "design_v2" / f"{stem}.dc.html").read_text(encoding="utf-8")
+    assert '<meta name="viewport" content="width=390">' in t, f"{stem} 找不到 viewport"
+    t = t.replace('<meta name="viewport" content="width=390">', V2_HEAD)
+    t = t.replace("width:390px;height:844px;", "width:100%;max-width:430px;min-height:100dvh;margin:0 auto;")
+    for k, v in V2.items():
+        t = t.replace(f'href="{k}.dc.html"', f'href="{v}.html"')
+    assert "dc.html" not in t and "width:390px" not in t, f"{stem} v2 還有未轉換的標記"
+    assert t.count("</body>") == 1
+    return t.replace("</body>", V2_TAIL)
+
+
 def main():
-    OUT.mkdir(exist_ok=True)
-    for stem, name in NAMES.items():
-        (OUT / f"{name}.html").write_text(convert(stem), encoding="utf-8", newline="\n")
+    (OUT / "v1").mkdir(parents=True, exist_ok=True)
+    for stem, name in NAMES.items():  # v1：保留在 /v1/
+        (OUT / "v1" / f"{name}.html").write_text(convert(stem, up="../"), encoding="utf-8", newline="\n")
+        print("寫出 v1/", f"{name}.html")
+    for stem, name in V2.items():  # v2：網站首頁
+        (OUT / f"{name}.html").write_text(convert_v2(stem), encoding="utf-8", newline="\n")
         print("寫出", f"{name}.html")
 
 
