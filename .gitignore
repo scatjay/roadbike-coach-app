@@ -1,0 +1,6 @@
+# 登入憑證與本機設定一律不進版控（Firebase 登入存在 .firebase-config，與其他登入隔離）
+.firebase-config/
+.firebase/
+.firebaserc.local
+*.log
+node_modules/

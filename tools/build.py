@@ -1,0 +1,100 @@
+"""把 design/*.dc.html（Claude Design 畫板）轉成 public/ 的獨立網頁（可裝成手機 APP）。
+用法：python tools/build.py   （只用標準函式庫，結果可重跑、同輸入同輸出）
+"""
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC, OUT = ROOT / "design", ROOT / "public"
+NAMES = {  # 畫板檔 → 網頁檔
+    "Home": "index", "Home_light": "index_light", "Ride": "ride",
+    "Post": "post", "Trainer": "trainer", "Coach": "coach",
+}
+FRAME = "width: 390px; height: 844px;"
+FRAME_NEW = "width: 100%; max-width: 430px; min-height: 100dvh; margin: 0 auto;"
+
+RIDE_JS = """<script>
+(function(){var f=false,b=document.getElementById('follow');
+b.addEventListener('click',function(){f=!f;
+b.textContent=f?'跟車靜音中（再按取消）':'我在跟車（靜音）';
+b.style.background=f?'#c6ff00':'transparent';b.style.color=f?'#0b0b0c':'#ffffff';
+b.style.borderColor=f?'#c6ff00':'#ffffff';});})();
+</script>"""
+
+POST_JS = """<script>
+(function(){var A=document.getElementById('stepA'),B=document.getElementById('stepB'),C=document.getElementById('stepC');
+function go(n){A.style.display=n==0?'flex':'none';B.style.display=n==1?'flex':'none';C.style.display=n==2?'block':'none';}
+document.querySelectorAll('[data-go]').forEach(function(e){e.addEventListener('click',function(){go(+e.dataset.go);});});
+go(0);})();
+</script>"""
+
+BTN = ("height: 64px; border: 3px solid #ffffff; background: transparent; color: #ffffff; font-size: 28px; "
+       "font-weight: 900; font-family: 'Barlow Condensed', 'Noto Sans TC', system-ui, sans-serif")
+
+
+def convert(stem: str) -> str:
+    t = (SRC / f"{stem}.dc.html").read_text(encoding="utf-8")
+    title = re.search(r"<title>(.*?)</title>", t).group(1)
+    helmet = re.search(r"<helmet>(.*?)</helmet>", t, re.S).group(1)
+    body = re.search(r"</helmet>\s*(.*?)\s*</x-dc>", t, re.S).group(1)
+    body = body.replace(FRAME, FRAME_NEW)
+    for k, v in NAMES.items():
+        body = body.replace(f'href="{k}.dc.html"', f'href="{v}.html"')
+    extra = ""
+    if stem == "Ride":
+        body = re.sub(r'<button type="button" onClick="\{\{ toggleFollow \}\}".*?</button>',
+                      '<button type="button" id="follow" style="height: 64px; border: 3px solid #ffffff; background: '
+                      'transparent; color: #ffffff; font-size: 24px; font-weight: 900; font-family: inherit">'
+                      '我在跟車（靜音）</button>', body, flags=re.S)
+        extra = RIDE_JS
+    if stem == "Post":
+        body = body.replace('<div style="display: {{ showA }}; flex-direction: column; gap: 10px">',
+                            '<div id="stepA" style="display: flex; flex-direction: column; gap: 10px">')
+        body = body.replace('<div style="display: {{ showB }}; flex-direction: column; gap: 10px">',
+                            '<div id="stepB" style="display: none; flex-direction: column; gap: 10px">')
+        body = body.replace('<div style="display: {{ showC }}; font-size: 28px;',
+                            '<div id="stepC" style="display: none; font-size: 28px;')
+        scores = "".join(f'<button type="button" data-go="1" style="{BTN}">{n}</button>' for n in range(1, 6))
+        hints = "".join(f'<button type="button" data-go="2" style="{BTN}">{h}</button>' for h in ("太多", "剛好", "太少"))
+        body = re.sub(r'<sc-for list="\{\{ scores \}\}".*?</sc-for>', scores, body, flags=re.S)
+        body = re.sub(r'<sc-for list="\{\{ hints \}\}".*?</sc-for>', hints, body, flags=re.S)
+        body = re.sub(r'<button type="button" onClick="\{\{ skip \}\}"',
+                      '<button type="button" data-go="SKIP"', body)
+        # 略過：A→B（略過第一題）、B→C；以所在區塊決定
+        body = body.replace('id="stepA" style="display: flex; flex-direction: column; gap: 10px">',
+                            'id="stepA" style="display: flex; flex-direction: column; gap: 10px" data-skip="1">', 1)
+        parts = body.split('data-go="SKIP"')
+        assert len(parts) == 3, "略過按鈕應有兩個"
+        body = parts[0] + 'data-go="1"' + parts[1] + 'data-go="2"' + parts[2]
+        extra = POST_JS
+    assert "{{" not in body and "sc-for" not in body and "x-dc" not in body, f"{stem} 還有未轉換的標記"
+    return f"""<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<title>{title}</title>
+{helmet.strip()}
+<style>html,body{{background:#0b0b0c}}</style>
+</head>
+<body>
+{body}
+{extra}
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){{}});</script>
+</body>
+</html>
+"""
+
+
+def main():
+    OUT.mkdir(exist_ok=True)
+    for stem, name in NAMES.items():
+        (OUT / f"{name}.html").write_text(convert(stem), encoding="utf-8", newline="\n")
+        print("寫出", f"{name}.html")
+
+
+if __name__ == "__main__":
+    main()

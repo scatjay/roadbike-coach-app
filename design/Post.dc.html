@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>騎後1110</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,800&amp;family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0b0b0c; color: #ffffff; font-family: 'Noto Sans TC', system-ui, sans-serif; display: flex; flex-direction: column">
+<div style="flex-grow: 1; padding: 28px 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+<div style="color: #bdbdbd; font-size: 18px; font-weight: 700">11/9（一）吉安宮往返 39.4 km</div>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px">
+<div style="color: #bdbdbd; font-size: 28px; font-weight: 700">同心率</div>
+<div style="display: flex; align-items: baseline; gap: 14px"><span style="font-family: 'Barlow Condensed', 'Noto Sans TC', system-ui, sans-serif; font-weight: 800; font-style: italic; font-size: 120px; line-height: 0.95; letter-spacing: -1px">19.0</span><span style="background: #c6ff00; color: #0b0b0c; font-size: 40px; font-weight: 900; padding: 2px 16px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)">持平</span></div>
+<div style="color: #bdbdbd; font-size: 18px">扣風後效率；近十趟還分不出進步</div>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: {{ showA }}; flex-direction: column; gap: 10px">
+<div style="font-size: 28px; font-weight: 900">還想再騎一趟嗎？</div>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{ scores }}" as="s" hint-placeholder-count="5">
+<button type="button" onClick="{{ s.pick }}" style="height: 64px; border: 3px solid #ffffff; background: transparent; color: #ffffff; font-size: 28px; font-weight: 900; font-family: 'Barlow Condensed', 'Noto Sans TC', system-ui, sans-serif">{{ s.n }}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{ skip }}" style="height: 48px; border: 0; background: transparent; color: #bdbdbd; font-size: 18px; font-family: inherit">略過</button>
+</div>
+<div style="display: {{ showB }}; flex-direction: column; gap: 10px">
+<div style="font-size: 28px; font-weight: 900">今天的提示</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ hints }}" as="h" hint-placeholder-count="3">
+<button type="button" onClick="{{ h.pick }}" style="height: 64px; border: 3px solid #ffffff; background: transparent; color: #ffffff; font-size: 28px; font-weight: 900; font-family: 'Barlow Condensed', 'Noto Sans TC', system-ui, sans-serif">{{ h.t }}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{ skip }}" style="height: 48px; border: 0; background: transparent; color: #bdbdbd; font-size: 18px; font-family: inherit">略過</button>
+</div>
+<div style="display: {{ showC }}; font-size: 28px; color: #c6ff00; font-weight: 900">記下了，謝謝。</div>
+<details style="font-size: 17px; color: #bdbdbd"><summary style="padding: 6px 0">更多</summary>
+<div style="line-height: 1.7">146 以下占 74%，最高 155<br>教練說了 32 句、擋 4 句、折返 0 句<br>近十趟扣風效率 16.7–19.9，每週趨勢 +0.16±0.31<br>11/12 基準騎是下一個對照點</div></details>
+</div>
+<nav style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 4px solid #c6ff00; background: #141416; height: 64px; font-size: 15px">
+<a href="Home.dc.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">今天</a>
+<a href="Ride.dc.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">騎乘中</a>
+<a href="Post.dc.html" style="display: flex; align-items: center; justify-content: center; background: #c6ff00; color: #0b0b0c; font-weight: 900">騎後</a>
+<a href="Trainer.dc.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">訓練台</a>
+<a href="Coach.dc.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">問教練</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { step: 0, score: 0, hint: '' }; }
+  renderVals() {
+    const st = this.state.step;
+    const scores = [1, 2, 3, 4, 5].map((n) => ({
+      n, pick: () => this.setState({ step: 1, score: n })
+    }));
+    const hints = ['太多', '剛好', '太少'].map((t) => ({
+      t, pick: () => this.setState({ step: 2, hint: t })
+    }));
+    return {
+      scores, hints,
+      showA: st === 0 ? 'flex' : 'none',
+      showB: st === 1 ? 'flex' : 'none',
+      showC: st === 2 ? 'block' : 'none',
+      skip: () => this.setState({ step: st === 0 ? 1 : 2 })
+    };
+  }
+}
+</script>
+</body>
+</html>

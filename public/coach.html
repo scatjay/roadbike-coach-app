@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<title>問教練1110</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,800&amp;family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+</style>
+<style>html,body{background:#0b0b0c}</style>
+</head>
+<body>
+<div style="width: 100%; max-width: 430px; min-height: 100dvh; margin: 0 auto; box-sizing: border-box; background: #0b0b0c; color: #ffffff; font-family: 'Noto Sans TC', system-ui, sans-serif; display: flex; flex-direction: column">
+<div style="flex-grow: 1; padding: 28px 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+<div style="color: #bdbdbd; font-size: 18px; font-weight: 700">問教練</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px">
+<div style="width: 56px; height: 8px; background: #c6ff00; transform: skewX(-20deg)"></div>
+<div style="color: #bdbdbd; font-size: 24px; font-weight: 700">逆風日要怎麼騎？</div>
+<div style="font-size: 44px; font-weight: 900; line-height: 1.25">逆風守心率，<br>不追速度。</div>
+<div style="font-size: 18px; color: #c6ff00; font-weight: 700">書中明說：踏頻與風書卡第 2 節</div>
+</div>
+<div style="display: flex; gap: 10px; align-items: center">
+<label for="ask" style="position: absolute; left: -9999px">輸入問題</label>
+<input id="ask" type="text" placeholder="打字或按住說話" style="flex-grow: 1; height: 60px; border: 3px solid #ffffff; background: transparent; color: #ffffff; padding: 0 14px; font-size: 20px; font-family: inherit; box-sizing: border-box; min-width: 0">
+<button type="button" aria-label="按住說話" style="width: 60px; height: 60px; border: 0; background: #c6ff00; color: #0b0b0c; display: flex; align-items: center; justify-content: center">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path></svg>
+</button>
+</div>
+</div>
+<nav style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 4px solid #c6ff00; background: #141416; height: 64px; font-size: 15px">
+<a href="index.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">今天</a>
+<a href="ride.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">騎乘中</a>
+<a href="post.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">騎後</a>
+<a href="trainer.html" style="display: flex; align-items: center; justify-content: center; color: #bdbdbd; font-weight: 500">訓練台</a>
+<a href="coach.html" style="display: flex; align-items: center; justify-content: center; background: #c6ff00; color: #0b0b0c; font-weight: 900">問教練</a>
+</nav>
+</div>
+
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+</body>
+</html>
