@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0b0b0c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="motion.css">
 <style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>
 <script>document.documentElement.classList.add("locked")</script>
 <title>路上騎乘中1110</title>
@@ -16,13 +17,13 @@
 <div style="width:100%;max-width:430px;min-height:100dvh;margin:0 auto;box-sizing:border-box;background:#0b0b0c;color:#ffffff;font-family:'Noto Sans TC',system-ui,sans-serif;display:flex;flex-direction:column">
 <div style="flex-grow:1;padding:28px 20px 16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
 <div style="display:flex;gap:8px"><a href="start.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">出發點</a><a href="ride.html" style="padding:4px 14px;border:2px solid;font-size:18px;background:#c6ff00;color:#0b0b0c;font-weight:900;border-color:#c6ff00">騎乘中</a><a href="turn.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">折返點</a></div>
-<div style="color:#bdbdbd;font-size:18px;line-height:1.6">手機在口袋時螢幕是關的。<br>你拿出來看，才是這一頁。</div>
-<div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:12px">
+<div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px;line-height:1.6">手機在口袋時螢幕是關的。<br>你拿出來看，才是這一頁。</div>
+<div class="m-in" style="--i:1;flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:12px">
 <div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">教練在線</div>
 <div id="sub" style="font-size:24px;color:#bdbdbd;font-weight:700">最後一則提示 4 分鐘前 · 手環</div>
 </div>
-<div id="ok" style="display:none;color:#c6ff00;font-size:28px;font-weight:900">已送出，看手環與車表</div>
-<button id="b" type="button" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900">震一下，確認手環與車表</button>
+<div id="ok" class="m-in" style="display:none;color:#c6ff00;font-size:28px;font-weight:900">已送出，看手環與車表</div>
+<button id="b" type="button" class="m-press" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900">震一下，確認手環與車表</button>
 <button id="t" type="button" style="border:0;background:transparent;color:#bdbdbd;font-size:14px;height:24px">（畫板用：切換異常）</button>
 <div style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
 </div>
@@ -32,9 +33,10 @@
 var bad=false;
 document.getElementById('b').onclick=function(){document.getElementById('ok').style.display='block'};
 document.getElementById('t').onclick=function(){bad=!bad;var m=document.getElementById('msg'),s=document.getElementById('sub');
-m.textContent=bad?'手環 9 分鐘沒回應':'教練在線';m.style.color=bad?'#ff8a5c':'#c6ff00';
+m.textContent=bad?'手環 9 分鐘沒回應':'教練在線';m.style.color=bad?'#ff8a5c':'#c6ff00';m.classList.toggle('m-pulse',bad);
 s.textContent=bad?'上一次震動確認是 9 分鐘前':'最後一則提示 4 分鐘前 · 手環';};
 </script>
+<script src="motion.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="gate.js"></script>

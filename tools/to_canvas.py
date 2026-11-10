@@ -14,6 +14,17 @@ BTN5 = ("height:64px;border:3px solid #fff;background:transparent;color:#fff;fon
         "font-family:'Barlow Condensed','Noto Sans TC',sans-serif")
 
 
+def canvas_motion_css():
+    """從 docs/motion.css 取出 CANVAS-SUBSET 標記之間的純 CSS（網頁版與畫布版共用同一來源）。"""
+    t = (ROOT / "docs" / "motion.css").read_text(encoding="utf-8")
+    a, b = t.index("/* CANVAS-SUBSET:START */"), t.index("/* CANVAS-SUBSET:END */")
+    return t[a + len("/* CANVAS-SUBSET:START */"):b].strip()
+
+
+# 畫布版的異常脈動：用行內 style 綁定（與網頁版 .m-pulse 同參數，只播 3 次）
+PULSE_ON = "m-pulse 360ms cubic-bezier(.2,.8,.2,1) 3"
+
+
 def sub(body, old, new):
     assert body.count(old) == 1, f"找不到或重複：{old[:60]}"
     return body.replace(old, new)
@@ -35,6 +46,7 @@ def wrap(title, body, script):
 body{{margin:0}}
 a{{color:inherit;text-decoration:none}}
 button{{font-family:inherit;cursor:pointer}}
+{canvas_motion_css()}
 </style>
 </helmet>
 {body}
@@ -47,8 +59,8 @@ button{{font-family:inherit;cursor:pointer}}
 """
 
 
-OK_DIV = '<div id="ok" style="display:none;'
-SEND_BTN = '<button id="b" type="button" style="'
+OK_DIV = '<div id="ok" class="m-in" style="display:none;'
+SEND_BTN = '<button id="b" type="button" class="m-press" style="'
 TOGGLE = '<button id="t" type="button" style="'
 
 
@@ -57,8 +69,8 @@ def conv(stem):
     title = re.search(r"<title>(.*?)</title>", t).group(1)
     body = t[t.index("<body>") + 6:t.index("<script>")].strip()
     if stem == "Home":
-        body = sub(body, OK_DIV, '<div style="display:{{ okShow }};')
-        body = sub(body, SEND_BTN, '<button type="button" onClick="{{ send }}" style="display:{{ bShow }};')
+        body = sub(body, OK_DIV, '<div class="m-in" style="display:{{ okShow }};')
+        body = sub(body, SEND_BTN, '<button type="button" class="m-press" onClick="{{ send }}" style="display:{{ bShow }};')
         js = """class Component extends DCLogic {
   constructor(props) { super(props); this.state = { sent: false }; }
   renderVals() {
@@ -72,11 +84,11 @@ def conv(stem):
         body = sub(body, TOGGLE, '<button type="button" onClick="{{ flip }}" style="')
         if stem == "Start":
             body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">全綠<br>可以收進口袋</div>',
-                       '<div style="font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line;color:{{ msgColor }}">{{ msgText }}</div>')
+                       '<div style="font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line;color:{{ msgColor }};transform-origin:left center;animation:{{ msgAnim }}">{{ msgText }}</div>')
             texts = "msgText: b ? '車表沒回應\\n先叫醒它' : '全綠\\n可以收進口袋',"
         else:
             body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">教練在線</div>',
-                       '<div style="font-size:56px;font-weight:900;line-height:1.15;color:{{ msgColor }}">{{ msgText }}</div>')
+                       '<div style="font-size:56px;font-weight:900;line-height:1.15;color:{{ msgColor }};transform-origin:left center;animation:{{ msgAnim }}">{{ msgText }}</div>')
             body = sub(body, '<div id="sub" style="font-size:24px;color:#bdbdbd;font-weight:700">最後一則提示 4 分鐘前 · 手環</div>',
                        '<div style="font-size:24px;color:#bdbdbd;font-weight:700">{{ subText }}</div>')
             texts = ("msgText: b ? '手環 9 分鐘沒回應' : '教練在線',\n"
@@ -88,6 +100,7 @@ def conv(stem):
     return {{
       {texts}
       msgColor: b ? '#ff8a5c' : '#c6ff00',
+      msgAnim: b ? '{PULSE_ON}' : 'none',
       okShow: this.state.sent ? 'block' : 'none',
       send: () => this.setState({{ sent: true }}),
       flip: () => this.setState({{ bad: !b }})
@@ -102,7 +115,7 @@ def conv(stem):
                    '<div style="color:#bdbdbd;font-size:28px;font-weight:700">{{ labText }}</div>')
         body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15">順風<br><span style="color:#c6ff00">剩 19.9 k</span></div>',
                    '<div style="display:{{ goodShow }};font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line">順風\n<span style="color:#c6ff00">剩 19.9 k</span></div>'
-                   '\n<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15"><span style="color:#ff8a5c">手環沒回應</span></div>')
+                   '\n<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15;transform-origin:left center;animation:' + PULSE_ON + '"><span style="color:#ff8a5c">手環沒回應</span></div>')
         body = sub(body, '<div id="sub" style="font-size:20px;color:#bdbdbd;line-height:1.6">去程 22.7 km/h（頂風）· 心率 141<br>手環 車表 在線</div>',
                    '<div style="font-size:20px;color:#bdbdbd;line-height:1.6;white-space:pre-line">{{ subText }}</div>')
         body = sub(body, '<div id="act" style="display:none;flex-direction:column;gap:8px">',
@@ -124,13 +137,13 @@ def conv(stem):
   }
 }"""
     elif stem == "Post":
-        body = sub(body, '<div id="q" style="display:flex;flex-direction:column;gap:10px">',
-                   '<div style="display:{{ qShow }};flex-direction:column;gap:10px">')
-        five = "".join(f'<button type="button" onClick="{{{{ done }}}}" style="{BTN5}">{n}</button>' for n in range(1, 6))
+        body = sub(body, '<div id="q" class="m-in" style="--i:2;display:flex;flex-direction:column;gap:10px">',
+                   '<div class="m-in" style="--i:2;display:{{ qShow }};flex-direction:column;gap:10px">')
+        five = "".join(f'<button type="button" class="m-press" onClick="{{{{ done }}}}" style="{BTN5}">{n}</button>' for n in range(1, 6))
         body = sub(body, '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px" id="s"></div>',
                    f'<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px">{five}</div>')
-        body = sub(body, '<button id="skip" type="button" style="', '<button type="button" onClick="{{ done }}" style="')
-        body = sub(body, '<div id="done" style="display:none;', '<div style="display:{{ doneShow }};')
+        body = sub(body, '<button id="skip" type="button" class="m-press" style="', '<button type="button" class="m-press" onClick="{{ done }}" style="')
+        body = sub(body, '<div id="done" class="m-in" style="display:none;', '<div class="m-in" style="display:{{ doneShow }};')
         js = """class Component extends DCLogic {
   constructor(props) { super(props); this.state = { done: false }; }
   renderVals() {
@@ -139,8 +152,8 @@ def conv(stem):
   }
 }"""
     elif stem == "Coach":
-        body = sub(body, '<div id="heard" style="display:none;', '<div style="display:{{ heardShow }};')
-        body = sub(body, SEND_BTN, '<button type="button" onClick="{{ talk }}" style="')
+        body = sub(body, '<div id="heard" class="m-in" style="display:none;', '<div class="m-in" style="display:{{ heardShow }};')
+        body = sub(body, SEND_BTN, '<button type="button" class="m-press" onClick="{{ talk }}" style="')
         js = """class Component extends DCLogic {
   constructor(props) { super(props); this.state = { heard: false }; }
   renderVals() {

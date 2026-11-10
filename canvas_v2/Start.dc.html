@@ -13,14 +13,33 @@
 body{margin:0}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer}
+@keyframes m-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes m-sweep{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:none}}
+@keyframes m-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* m-in：進場（淡入＋上移 12px，280ms）。用 --i 排先後，每級 60ms。 */
+html:not(.locked) .m-in{animation:m-in 280ms cubic-bezier(.2,.8,.2,1) calc(var(--i,0) * 60ms) backwards}
+/* m-sweep：斜切色塊從左掃入（360ms，等主數字先出場 350ms） */
+html:not(.locked) .m-sweep{transform-origin:left center;animation:m-sweep 360ms cubic-bezier(.2,.8,.2,1) 350ms backwards}
+/* m-pulse：異常強調，只播 3 次（3 x 360ms = 1.08s）後靜止。畫布版用行內 style 帶同一組參數。 */
+html:not(.locked) .m-pulse{transform-origin:left center;animation:m-pulse 360ms cubic-bezier(.2,.8,.2,1) 3}
+/* m-press：按壓回饋，90ms */
+.m-press{transition:transform 90ms ease-out,opacity 90ms ease-out}
+.m-press:active{transform:scale(.97);opacity:.85}
+
+@media (prefers-reduced-motion:reduce){
+  html .m-in,html .m-sweep,html .m-pulse,[style*="m-pulse"]{animation:none!important}
+  .m-press{transition:none}
+  .m-press:active{transform:none;opacity:.7}
+}
 </style>
 </helmet>
 <div style="width:390px;height:844px;box-sizing:border-box;background:#0b0b0c;color:#ffffff;font-family:'Noto Sans TC',system-ui,sans-serif;display:flex;flex-direction:column">
 <div style="flex-grow:1;padding:28px 20px 16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
 <div style="display:flex;gap:8px"><a href="Start.dc.html" style="padding:4px 14px;border:2px solid;font-size:18px;background:#c6ff00;color:#0b0b0c;font-weight:900;border-color:#c6ff00">出發點</a><a href="Ride.dc.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">騎乘中</a><a href="Turn.dc.html" style="padding:4px 14px;border:2px solid;font-size:18px;color:#bdbdbd;font-weight:700;border-color:#3a3a3d">折返點</a></div>
-<div style="color:#bdbdbd;font-size:18px">吉安宮 · 車表剛開 · 收進口袋前最後一眼</div>
-<div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
-<div style="font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line;color:{{ msgColor }}">{{ msgText }}</div>
+<div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px">吉安宮 · 車表剛開 · 收進口袋前最後一眼</div>
+<div class="m-in" style="--i:1;flex-grow:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
+<div style="font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line;color:{{ msgColor }};transform-origin:left center;animation:{{ msgAnim }}">{{ msgText }}</div>
 <details style="font-size:18px;color:#bdbdbd"><summary style="padding:6px 0">哪四項</summary>
 <div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>教練</span><span style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>心率帶＋踏頻器</span><span style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>手環</span><span style="color:#c6ff00">✓</span></div><div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;padding:6px 0;border-bottom:1px solid #2a2a2d"><span>車表</span><span style="color:#c6ff00">✓</span></div>
 </details>
@@ -41,6 +60,7 @@ class Component extends DCLogic {
     return {
       msgText: b ? '車表沒回應\n先叫醒它' : '全綠\n可以收進口袋',
       msgColor: b ? '#ff8a5c' : '#c6ff00',
+      msgAnim: b ? 'm-pulse 360ms cubic-bezier(.2,.8,.2,1) 3' : 'none',
       okShow: this.state.sent ? 'block' : 'none',
       send: () => this.setState({ sent: true }),
       flip: () => this.setState({ bad: !b })

@@ -10,20 +10,20 @@
 <body>
 <div style="width:390px;height:844px;box-sizing:border-box;background:#0b0b0c;color:#ffffff;font-family:'Noto Sans TC',system-ui,sans-serif;display:flex;flex-direction:column">
 <div style="flex-grow:1;padding:28px 20px 16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
-<div style="color:#bdbdbd;font-size:18px;font-weight:700">11/9（一）吉安宮往返 39.4 km</div>
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+<div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px;font-weight:700">11/9（一）吉安宮往返 39.4 km</div>
+<div class="m-in" style="--i:1;display:flex;flex-direction:column;gap:8px;margin-top:8px">
 <div style="color:#bdbdbd;font-size:28px;font-weight:700">同心率</div>
-<div style="display:flex;align-items:baseline;gap:14px"><span style="font-family:'Barlow Condensed','Noto Sans TC',system-ui,sans-serif;font-weight:800;font-style:italic;font-size:120px;line-height:0.95;letter-spacing:-1px">19.0</span><span style="background:#c6ff00;color:#0b0b0c;font-size:40px;font-weight:900;padding:2px 16px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)">持平</span></div>
+<div style="display:flex;align-items:baseline;gap:14px"><span class="m-count" style="font-family:'Barlow Condensed','Noto Sans TC',system-ui,sans-serif;font-weight:800;font-style:italic;font-size:120px;line-height:0.95;letter-spacing:-1px">19.0</span><span class="m-sweep" style="background:#c6ff00;color:#0b0b0c;font-size:40px;font-weight:900;padding:2px 16px;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)">持平</span></div>
 <div style="color:#bdbdbd;font-size:18px">扣風後效率；近十趟還分不出進步</div>
 </div>
 <div style="flex-grow:1"></div>
-<div id="q" style="display:flex;flex-direction:column;gap:10px">
+<div id="q" class="m-in" style="--i:2;display:flex;flex-direction:column;gap:10px">
 <div style="font-size:28px;font-weight:900">還想再騎一趟嗎？</div>
 <div style="color:#bdbdbd;font-size:18px">也可以直接說：「四分」</div>
 <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px" id="s"></div>
-<button id="skip" type="button" style="height:56px;border:0;background:transparent;color:#bdbdbd;font-size:18px">略過</button>
+<button id="skip" type="button" class="m-press" style="height:56px;border:0;background:transparent;color:#bdbdbd;font-size:18px">略過</button>
 </div>
-<div id="done" style="display:none;font-size:28px;color:#c6ff00;font-weight:900">記下了，謝謝。</div>
+<div id="done" class="m-in" style="display:none;font-size:28px;color:#c6ff00;font-weight:900">記下了，謝謝。</div>
 <details style="font-size:18px;color:#bdbdbd"><summary style="padding:6px 0">更多</summary>
 <div style="line-height:1.7">146 以下占 74%，最高 155<br>教練說了 32 句、擋 4 句、折返 0 句<br>11/12 基準騎是下一個對照點</div></details>
 <div style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
@@ -32,7 +32,7 @@
 </div>
 <script>
 var s=document.getElementById('s');
-for(var i=1;i<=5;i++){var b=document.createElement('button');b.type='button';b.textContent=i;
+for(var i=1;i<=5;i++){var b=document.createElement('button');b.type='button';b.className='m-press';b.textContent=i;
 b.style.cssText="height:64px;border:3px solid #fff;background:transparent;color:#fff;font-size:28px;font-weight:900;font-family:'Barlow Condensed','Noto Sans TC',sans-serif";
 b.onclick=done;s.appendChild(b);}
 document.getElementById('skip').onclick=done;

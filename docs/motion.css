@@ -1,0 +1,27 @@
+/* 動畫語彙（網頁版與畫布版共用的單一來源）。設計原則見 docs_research/motion_research_20261110.md
+ * - 只動 transform / opacity；不使用 will-change；沒有任何無限循環
+ * - 登入閘門顯示時（html.locked）頁面內容是隱藏的，所以動畫只在解鎖後才開始（html:not(.locked)）
+ * - 偏好「減少動態」時一律關閉動畫，直接顯示最終狀態
+ * 下面 CANVAS-SUBSET 標記之間的規則會被 tools/to_canvas.py 原封搬進畫布版的 <helmet><style>。 */
+/* CANVAS-SUBSET:START */
+@keyframes m-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes m-sweep{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:none}}
+@keyframes m-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+/* m-in：進場（淡入＋上移 12px，280ms）。用 --i 排先後，每級 60ms。 */
+html:not(.locked) .m-in{animation:m-in 280ms cubic-bezier(.2,.8,.2,1) calc(var(--i,0) * 60ms) backwards}
+/* m-sweep：斜切色塊從左掃入（360ms，等主數字先出場 350ms） */
+html:not(.locked) .m-sweep{transform-origin:left center;animation:m-sweep 360ms cubic-bezier(.2,.8,.2,1) 350ms backwards}
+/* m-pulse：異常強調，只播 3 次（3 x 360ms = 1.08s）後靜止。畫布版用行內 style 帶同一組參數。 */
+html:not(.locked) .m-pulse{transform-origin:left center;animation:m-pulse 360ms cubic-bezier(.2,.8,.2,1) 3}
+/* m-press：按壓回饋，90ms */
+.m-press{transition:transform 90ms ease-out,opacity 90ms ease-out}
+.m-press:active{transform:scale(.97);opacity:.85}
+
+@media (prefers-reduced-motion:reduce){
+  html .m-in,html .m-sweep,html .m-pulse,[style*="m-pulse"]{animation:none!important}
+  .m-press{transition:none}
+  .m-press:active{transform:none;opacity:.7}
+}
+/* CANVAS-SUBSET:END */
+/* m-count：數字計數由 motion.js 處理，這裡不需要規則（畫布版不計數，直接顯示最終值） */

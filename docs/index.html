@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0b0b0c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="motion.css">
 <style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>
 <script>document.documentElement.classList.add("locked")</script>
 <title>今天1110</title>
@@ -15,16 +16,16 @@
 <body>
 <div style="width:100%;max-width:430px;min-height:100dvh;margin:0 auto;box-sizing:border-box;background:#0b0b0c;color:#ffffff;font-family:'Noto Sans TC',system-ui,sans-serif;display:flex;flex-direction:column">
 <div style="flex-grow:1;padding:28px 20px 16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
-<div style="color:#bdbdbd;font-size:18px;font-weight:700">11/12（四）第 4 週 · 基準騎 · 30 km</div>
-<div style="margin-top:24px;display:flex;flex-direction:column;gap:6px">
+<div class="m-in" style="--i:0;color:#bdbdbd;font-size:18px;font-weight:700">11/12（四）第 4 週 · 基準騎 · 30 km</div>
+<div class="m-in" style="--i:1;margin-top:24px;display:flex;flex-direction:column;gap:6px">
 <div style="color:#bdbdbd;font-size:28px;font-weight:700">心率守</div>
-<div style="font-family:'Barlow Condensed','Noto Sans TC',system-ui,sans-serif;font-weight:800;font-style:italic;font-size:150px;line-height:0.95;letter-spacing:-1px">146</div>
+<div class="m-count" style="font-family:'Barlow Condensed','Noto Sans TC',system-ui,sans-serif;font-weight:800;font-style:italic;font-size:150px;line-height:0.95;letter-spacing:-1px">146</div>
 <div style="font-size:28px;font-weight:900;color:#c6ff00">去程別衝</div>
 </div>
-<div style="color:#bdbdbd;font-size:18px;line-height:1.6;margin-top:8px">車表到吉安宮再開 · 踏頻器出門前轉一下曲柄<br>香蕉帶了嗎</div>
+<div class="m-in" style="--i:2;color:#bdbdbd;font-size:18px;line-height:1.6;margin-top:8px">車表到吉安宮再開 · 踏頻器出門前轉一下曲柄<br>香蕉帶了嗎</div>
 <div style="flex-grow:1"></div>
-<div id="ok" style="display:none;color:#c6ff00;font-size:28px;font-weight:900">已送出，看手環有沒有震</div>
-<button id="b" type="button" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900">震一下手環</button>
+<div id="ok" class="m-in" style="display:none;color:#c6ff00;font-size:28px;font-weight:900">已送出，看手環有沒有震</div>
+<button id="b" type="button" class="m-press" style="height:64px;border:3px solid #ffffff;background:transparent;color:#ffffff;font-size:24px;font-weight:900">震一下手環</button>
 <div style="color:#bdbdbd;font-size:14px">示意數字 · v2 概念稿</div>
 </div>
 <nav style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:4px solid #c6ff00;background:#141416;height:64px;font-size:18px"><a href="index.html" style="display:flex;align-items:center;justify-content:center;background:#c6ff00;color:#0b0b0c;font-weight:900">今天</a><a href="ride.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">路上</a><a href="post.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">騎後</a><a href="coach.html" style="display:flex;align-items:center;justify-content:center;color:#bdbdbd;font-weight:500">問教練</a></nav>
@@ -32,6 +33,7 @@
 <script>
 document.getElementById('b').onclick=function(){document.getElementById('ok').style.display='block';this.style.display='none'}
 </script>
+<script src="motion.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="gate.js"></script>

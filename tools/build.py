@@ -100,10 +100,12 @@ V2_HEAD = (
     '<meta name="theme-color" content="#0b0b0c">\n'
     '<link rel="manifest" href="manifest.webmanifest">\n'
     '<link rel="icon" href="icon.svg">\n'
+    '<link rel="stylesheet" href="motion.css">\n'
     '<style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>\n'
     '<script>document.documentElement.classList.add("locked")</script>'
 )
 V2_TAIL = (
+    '<script src="motion.js"></script>\n'
     '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>\n'
     '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>\n'
     '<script src="gate.js"></script>\n'
