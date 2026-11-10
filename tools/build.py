@@ -1,11 +1,11 @@
-"""把 design/*.dc.html（Claude Design 畫板）轉成 public/ 的獨立網頁（可裝成手機 APP）。
+"""把 design/*.dc.html（Claude Design 畫板）轉成 docs/ 的獨立網頁（GitHub Pages 發布資料夾）（可裝成手機 APP）。
 用法：python tools/build.py   （只用標準函式庫，結果可重跑、同輸入同輸出）
 """
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC, OUT = ROOT / "design", ROOT / "public"
+SRC, OUT = ROOT / "design", ROOT / "docs"
 NAMES = {  # 畫板檔 → 網頁檔
     "Home": "index", "Home_light": "index_light", "Ride": "ride",
     "Post": "post", "Trainer": "trainer", "Coach": "coach",
@@ -78,11 +78,15 @@ def convert(stem: str) -> str:
 <link rel="icon" href="icon.svg">
 <title>{title}</title>
 {helmet.strip()}
-<style>html,body{{background:#0b0b0c}}</style>
+<style>html,body{{background:#0b0b0c}}html.locked body>*:not(#gate){{visibility:hidden}}</style>
+<script>document.documentElement.classList.add("locked")</script>
 </head>
 <body>
 {body}
 {extra}
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="gate.js"></script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){{}});</script>
 </body>
 </html>
