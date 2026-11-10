@@ -1,5 +1,5 @@
 // 離線快取：先讀快取、背景更新（頁面是靜態的，沒有任何使用者資料）
-const V = 'rbc-v6';
+const V = 'rbc-v7';
 const FILES = ['./', 'index.html', 'index_light.html', 'start.html', 'ride.html', 'turn.html', 'post.html', 'coach.html', 'manifest.webmanifest', 'icon.svg', 'gate.js', 'motion.css', 'motion.js', 'bridge.js', 'bridge_fixtures.js',
   'fixtures/status_ok.json', 'fixtures/status_band_unconfirmed.json', 'fixtures/status_coach_silent.json', 'fixtures/status_riding.json', 'fixtures/status_bridge_down.json'];
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));

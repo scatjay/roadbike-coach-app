@@ -91,8 +91,8 @@ def conv(stem):
         else:
             body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15;color:#c6ff00">教練在線</div>',
                        '<div style="font-size:56px;font-weight:900;line-height:1.15;color:{{ msgColor }};transform-origin:left center;animation:{{ msgAnim }}">{{ msgText }}</div>')
-            body = sub(body, '<div id="sub" style="font-size:24px;color:#bdbdbd;font-weight:700">車表最後推送 41 秒前</div>',
-                       '<div style="font-size:24px;color:#bdbdbd;font-weight:700">{{ subText }}</div>')
+            body = sub(body, '<div id="sub" style="font-size:28px;color:#bdbdbd;font-weight:700">車表最後推送 41 秒前</div>',
+                       '<div style="font-size:28px;color:#bdbdbd;font-weight:700">{{ subText }}</div>')
             texts = ("msgText: b ? '教練沒回應' : '教練在線',\n"
                      "      subText: b ? '已靜默 6 分鐘' : '車表最後推送 41 秒前',")
         js = f"""class Component extends DCLogic {{
@@ -118,8 +118,8 @@ def conv(stem):
         body = sub(body, '<div id="msg" style="font-size:56px;font-weight:900;line-height:1.15">教練與車表<br><span style="color:#c6ff00">在線</span></div>',
                    '<div style="display:{{ goodShow }};font-size:56px;font-weight:900;line-height:1.15;white-space:pre-line">教練與車表\n<span style="color:#c6ff00">在線</span></div>'
                    '\n<div style="display:{{ badShow }};font-size:56px;font-weight:900;line-height:1.15;transform-origin:left center;animation:' + PULSE_ON + '"><span style="color:#ff8a5c">教練沒回應</span></div>')
-        body = sub(body, '<div id="sub" style="font-size:20px;color:#bdbdbd;line-height:1.6">回程建議請看車表／語音</div>',
-                   '<div style="font-size:20px;color:#bdbdbd;line-height:1.6;white-space:pre-line">{{ subText }}</div>')
+        body = sub(body, '<div id="sub" style="font-size:24px;color:#bdbdbd;line-height:1.6">回程建議請看車表／語音</div>',
+                   '<div style="font-size:24px;color:#bdbdbd;line-height:1.6;white-space:pre-line">{{ subText }}</div>')
         body = sub(body, '<div id="act" style="display:none;flex-direction:column;gap:8px">',
                    '<div style="display:{{ actShow }};flex-direction:column;gap:8px">')
         js = """class Component extends DCLogic {

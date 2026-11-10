@@ -260,7 +260,7 @@
     if (it.ageText) {
       var s = root.document.createElement('span');
       s.textContent = it.ageText;
-      s.style.cssText = 'display:block;font-size:14px;font-weight:500;color:#bdbdbd';
+      s.style.cssText = 'display:block;font-size:20px;font-weight:500;color:#bdbdbd';
       el.appendChild(s);
     }
   }
