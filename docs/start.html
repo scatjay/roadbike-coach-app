@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="layout.css">
 <style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>
 <script>document.documentElement.classList.add("locked")</script>
 <title>路上出發點1110</title>
@@ -38,6 +39,7 @@ var tg=document.getElementById('t');if(tg)tg.onclick=function(){bad=!bad;var m=d
 m.innerHTML=bad?'車表沒回應<br>先叫醒它':'教練與感測器正常<br>手環請確認';m.style.color=bad?'#ff8a5c':'#c6ff00';m.classList.toggle('m-pulse',bad);};
 </script>
 <script src="motion.js"></script>
+<script src="swipe.js"></script>
 <script src="bridge_fixtures.js"></script>
 <script src="bridge.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>

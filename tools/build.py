@@ -102,11 +102,13 @@ V2_HEAD = (
     '<link rel="manifest" href="manifest.webmanifest">\n'
     '<link rel="icon" href="icon.svg">\n'
     '<link rel="stylesheet" href="motion.css">\n'
+    '<link rel="stylesheet" href="layout.css">\n'
     '<style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>\n'
     '<script>document.documentElement.classList.add("locked")</script>'
 )
 V2_TAIL = (
     '<script src="motion.js"></script>\n'
+    '<script src="swipe.js"></script>\n'
     '<script src="bridge_fixtures.js"></script>\n'
     '<script src="bridge.js"></script>\n'
     '<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>\n'

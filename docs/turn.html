@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="layout.css">
 <style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>
 <script>document.documentElement.classList.add("locked")</script>
 <title>路上折返點1110</title>
@@ -41,6 +42,7 @@ document.getElementById('sub').innerHTML=bad?'回程提示會先走車表與語�
 document.getElementById('act').style.display=bad?'flex':'none';document.getElementById('msg').classList.toggle('m-pulse',bad);};
 </script>
 <script src="motion.js"></script>
+<script src="swipe.js"></script>
 <script src="bridge_fixtures.js"></script>
 <script src="bridge.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
