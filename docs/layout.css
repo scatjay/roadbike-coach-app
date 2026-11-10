@@ -16,7 +16,7 @@ details>div{gap:8px}
 /* 登出鈕固定右上，不與頁面重疊（頁面已留白） */
 #gOut{top:max(8px,env(safe-area-inset-top,0px))!important}
 /* 大按鈕：字放大後會換行，高度隨內容撐開，不再溢出框外 */
-body button[data-b-full],body>div>div:first-child>button{height:auto!important;min-height:64px;padding:12px 16px;line-height:1.3;text-wrap:balance}
+body button#b,body button[data-b-full]{height:auto!important;min-height:64px;padding:12px 16px;line-height:1.3;text-wrap:balance}
 /* 換頁過場（跨文件 View Transitions，Chrome 126+；不支援的瀏覽器直接換頁，不影響使用）。
  * 方向由 swipe.js 寫入 --vt-x-out／--vt-x-in；只動 transform 與 opacity，總長約 0.2 秒。 */
 @view-transition{navigation:auto}
@@ -31,4 +31,4 @@ details>div{padding:2px 0!important;line-height:1.2}
 details>div span[data-b^="row-"] span{margin-top:0;line-height:1.2}
 details>summary{padding:2px 0!important}
 body>div>div:first-child{gap:12px!important}
-body button[data-b-full]{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:4;background:#0b0b0c}
+body button#b,body button[data-b-full]{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:4;background:#0b0b0c}
