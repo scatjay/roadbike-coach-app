@@ -6,6 +6,19 @@
   var cur = (location.pathname.split('/').pop() || 'index.html');
   var i = ORDER.indexOf(cur);
   if (i < 0) return;
+  function go(file, dir) {
+    try { sessionStorage.setItem('rbc_dir', dir); } catch (e) {}
+    document.documentElement.style.setProperty('--vt-x-out', dir === 'next' ? '-28px' : '28px');
+    location.href = file + location.search;
+  }
+  // 點分頁／底部導覽：依目標頁在順序中的位置決定方向
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    var f = (a.getAttribute('href') || '').split('?')[0].split('/').pop(), k = ORDER.indexOf(f);
+    if (k < 0 || k === i) return;
+    e.preventDefault(); go(f, k > i ? 'next' : 'prev');
+  });
   var x0, y0, t0, ok = false;
   function blocked(el) {
     for (; el && el !== document.body; el = el.parentNode) {
@@ -26,6 +39,6 @@
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || Date.now() - t0 > 700) return;
     var j = i + (dx < 0 ? 1 : -1);
     if (j < 0 || j >= ORDER.length) return;
-    location.href = ORDER[j] + location.search;
+    go(ORDER[j], dx < 0 ? 'next' : 'prev');
   }, { passive: true });
 })();

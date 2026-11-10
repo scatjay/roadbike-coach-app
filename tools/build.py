@@ -104,7 +104,9 @@ V2_HEAD = (
     '<link rel="stylesheet" href="motion.css">\n'
     '<link rel="stylesheet" href="layout.css">\n'
     '<style>html,body{background:#0b0b0c}html.locked body>*:not(#gate){visibility:hidden}</style>\n'
-    '<script>document.documentElement.classList.add("locked")</script>'
+    '<script>(function(){var h=document.documentElement;try{if(localStorage.getItem("rbc_in")!=="1")h.classList.add("locked");'
+    'var d=sessionStorage.getItem("rbc_dir");if(d){h.style.setProperty("--vt-x-in",d==="next"?"28px":"-28px");sessionStorage.removeItem("rbc_dir")}}'
+    'catch(e){h.classList.add("locked")}})()</script>'
 )
 V2_TAIL = (
     '<script src="motion.js"></script>\n'

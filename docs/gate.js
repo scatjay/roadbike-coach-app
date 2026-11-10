@@ -72,7 +72,8 @@
 
     function accept(user) {
       var email = ((user && user.email) || '').toLowerCase();
-      if (ALLOW.indexOf(email) >= 0) { unlock(); addLogout(email); return true; }
+      if (ALLOW.indexOf(email) >= 0) { try { localStorage.setItem('rbc_in', '1'); } catch (e) {} unlock(); addLogout(email); return true; }
+      try { localStorage.removeItem('rbc_in'); } catch (e) {}
       try { auth.signOut(); } catch (e) {}
       showGate();
       say('這個帳號（' + email + '）不在名單內。要加人請改 docs/gate.js 的 ALLOW。');
@@ -101,6 +102,7 @@
     var wasIn = false;
     auth.onAuthStateChanged(function (u) {
       if (u) { wasIn = true; accept(u); return; }
+      try { localStorage.removeItem('rbc_in'); } catch (e) {}
       removeLogout(); showGate();
       if (wasIn) say('已登出。');
       wasIn = false;
