@@ -255,13 +255,19 @@
     el.textContent = '';
     el.style.color = COLORS[it.level];
     el.style.textAlign = 'right';
-    el.style.maxWidth = '70%';
+    el.style.whiteSpace = 'nowrap';
     el.appendChild(root.document.createTextNode(SYM[it.level] + ' ' + it.label));
-    if (it.ageText) {
-      var s = root.document.createElement('span');
-      s.textContent = it.ageText;
-      s.style.cssText = 'display:block;font-size:20px;font-weight:500;color:#bdbdbd';
-      el.appendChild(s);
+    // 時間說明放在左邊項目名稱底下（省一行高度，一屏看得完）
+    var lab = el.previousElementSibling;
+    if (lab) {
+      var old = lab.querySelector('.rb-age'); if (old) old.remove();
+      if (it.ageText) {
+        var s = root.document.createElement('span');
+        s.className = 'rb-age';
+        s.textContent = it.ageText;
+        s.style.cssText = 'display:block;font-size:20px;font-weight:500;color:#bdbdbd;line-height:1.25';
+        lab.appendChild(s);
+      }
     }
   }
 

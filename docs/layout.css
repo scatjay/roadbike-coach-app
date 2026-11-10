@@ -31,4 +31,9 @@ details>div{padding:2px 0!important;line-height:1.2}
 details>div span[data-b^="row-"] span{margin-top:0;line-height:1.2}
 details>summary{padding:2px 0!important}
 body>div>div:first-child{gap:12px!important}
-body button#b,body button[data-b-full]{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:4;background:#0b0b0c}
+/* 出發點一屏放得下：拿掉「哪四項」標題列；時間說明在項目名稱下面；項目名稱吃剩餘寬度，狀態靠右不換行 */
+details>summary{display:none}
+details>div>span:first-child{flex:1;min-width:0;padding-right:10px}
+details>div{align-items:flex-start}
+/* 登出鈕跟著頁面捲走，不再蓋住標題 */
+#gOut{position:absolute!important}
