@@ -40,3 +40,7 @@ details>div{align-items:flex-start}
 /* 出發點：口袋前最後一眼，四項狀態與動作鈕必須一屏看完（拿掉頂端裝飾說明行、說明句縮一級） */
 body[data-page="start"] [style*="--i:0"]{display:none!important}
 body[data-page="start"] [data-b="detail"]{font-size:20px!important;line-height:1.35!important}
+/* ── 教練改了什麼（rsi.html）：全域規則會把 details>summary 藏起來，這頁要拿它當展開鈕 ── */
+body[data-page="rsi"] details>summary{display:block}
+body[data-page="rsi"] .r-h1{font-size:clamp(30px,9vw,40px);text-wrap:balance;word-break:keep-all;overflow-wrap:normal}
+body[data-page="rsi"] .r-card details>summary{min-height:44px;padding:8px 0!important}

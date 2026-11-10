@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "t": 1783000000.5,
+ "proposals": null,
+ "candidates": null,
+ "auto_branches": null,
+ "switches": {
+  "loop_act_off": null,
+  "stability": null
+ },
+ "spend": null
+}

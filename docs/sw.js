@@ -1,7 +1,8 @@
 // 離線快取：網路優先（3 秒逾時退回快取）；頁面是靜態的，沒有任何使用者資料
-const V = 'rbc-v17';
-const FILES = ['./', 'index.html', 'start.html', 'ride.html', 'turn.html', 'post.html', 'coach.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'gate.js', 'motion.css', 'layout.css', 'swipe.js', 'motion.js', 'bridge.js', 'bridge_fixtures.js',
-  'fixtures/status_ok.json', 'fixtures/status_band_unconfirmed.json', 'fixtures/status_coach_silent.json', 'fixtures/status_riding.json', 'fixtures/status_bridge_down.json'];
+const V = 'rbc-v18';
+const FILES = ['./', 'index.html', 'start.html', 'ride.html', 'turn.html', 'post.html', 'coach.html', 'rsi.html', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'gate.js', 'motion.css', 'layout.css', 'swipe.js', 'motion.js', 'bridge.js', 'bridge_fixtures.js',
+  'fixtures/status_ok.json', 'fixtures/status_band_unconfirmed.json', 'fixtures/status_coach_silent.json', 'fixtures/status_riding.json', 'fixtures/status_bridge_down.json',
+  'fixtures/rsi_ok.json', 'fixtures/rsi_empty.json', 'fixtures/rsi_unavailable.json'];
 // 逐檔快取、單檔失敗不讓整個安裝倒掉（舊版因清單裡一個不存在的檔，addAll 整批失敗、服務工作者從未註冊成功）
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())));

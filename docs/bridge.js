@@ -4,6 +4,9 @@
  *   預設            示意（內建夾具；?scenario=ok|band_unconfirmed|coach_silent|riding|bridge_down）
  *   ?bridge=local   本機樞紐 http://127.0.0.1:8790/v1/status，每 5 秒輪詢、逾時 2 秒、頁面不可見時暫停
  *   ?bridge=relay   遠端中繼（介面先留，尚未實作）
+ * 「教練改了什麼」頁（rsi.html，body[data-page=rsi]）另有 judgeRsi() 與 rsiProviders：
+ *   預設            示意（fixtures/rsi_ok.json；?rsi=ok|empty|unavailable 切換）
+ *   ?bridge=local   本機樞紐 http://127.0.0.1:8790/v1/rsi，每 15 秒輪詢、逾時 2 秒、頁面不可見時暫停
  * judge() 是純函式，node 也能直接 require 跑（見 tools/test_bridge.js）。
  * 原則：算不出來的不顯示；手環沒有任何讀值能證明「震了」，所以永遠不會是綠；公開倉庫，這裡沒有任何座標或金鑰。 */
 (function (root, factory) {
@@ -23,7 +26,9 @@
     TX_RECENT_S: 35,       // preflight.py（wait_s+5）
     BAND_RECENT_S: 600,    // 假設：文件沒給手環 age 門檻，超過 10 分鐘就說「尚未驗證」
     HU_FAIL_RECENT_S: 600, // 假設：車表失敗字樣超過 10 分鐘就不算反證
-    STALE_S: 30            // 假設：本機輪詢的回應超過 30 秒就視為過舊
+    STALE_S: 30,           // 假設：本機輪詢的回應超過 30 秒就視為過舊
+    RSI_STALE_S: 120,      // 假設：/v1/rsi 若帶 t，超過 120 秒就視為過舊（樞紐 60 秒快取＋15 秒輪詢）；沒帶 t 時以「這次有沒有讀到」為準
+    RSI_WEEK_S: 604800     // 「本週」＝最近 7 天
   };
   var COLORS = { green: '#c6ff00', gray: '#bdbdbd', red: '#ff8a5c' };
   var SYM = { green: '✓', gray: '？', red: '✕' };
@@ -377,10 +382,222 @@
     return { stop: function () { stopped = true; clearTimeout(timer); } };
   }
 
+  /* ====================== 教練改了什麼（/v1/rsi，唯讀） ======================
+   * 欄位依 30_hub_contract.md：proposals（id/kind/type/title/status/summary/age）、auto_branches（name/sha）、
+   * switches.loop_act_off；candidates、switches.stability、spend 目前樞紐一律回 null，這頁不顯示它們（沒有就是沒有，不編數字）。
+   * 網頁只記錄決定，絕不合併或改碼。 */
+  var RSI_LOCAL_URL = 'http://127.0.0.1:8790/v1/rsi';
+  var RSI_SCENARIOS = ['ok', 'empty', 'unavailable'];
+  var RSI_STATUS = { pending: '待審', merged: '已合併', rejected: '被退回', unknown: '狀態不明' };
+
+  function rsiStatus(s) {
+    s = typeof s === 'string' ? s.toLowerCase() : '';
+    if (/^(pending|proposed|review|open|new)/.test(s)) return 'pending';
+    if (/^(merged|applied|deployed|landed|done)/.test(s)) return 'merged';
+    if (/^(rejected|reverted|blocked|declined|denied|failed)/.test(s)) return 'rejected';
+    return 'unknown';
+  }
+  /* 來源：契約沒有 source 欄，只能從 kind 的字樣推（含 cli → 手機 CLI；含 loop/auto → 迴圈），推不出來就說來源不明 */
+  function rsiSource(kind) {
+    var k = typeof kind === 'string' ? kind : '';
+    if (/cli/i.test(k)) return '手機 CLI';
+    if (/loop|auto/i.test(k)) return '迴圈';
+    return '來源不明';
+  }
+  function rsiDown(detail, main) {
+    return { state: 'unavailable', level: 'gray', summary: main || '讀不到改動資料', notice: detail || '', items: [], pending: 0, mergedWeek: 0,
+      branchesKnown: false, loopAct: { label: '自動改碼：不明', level: 'gray' } };
+  }
+
+  /** 把 /v1/rsi 的內容讀成畫面要的東西。d=null 表示根本沒拿到；opts.nowS（秒）有給且 d.t 存在才做過舊判斷。純函式。 */
+  function judgeRsi(d, opts) {
+    opts = opts || {};
+    if (!d || typeof d !== 'object') return rsiDown(opts.error || '沒有拿到樞紐回應。', opts.loading ? '讀取中…' : '讀不到改動資料');
+    if (d.schema !== 1) return rsiDown('樞紐回應格式不對（schema 不是 1），這個頁面讀不了。');
+    var drift = (num(opts.nowS) && num(d.t)) ? Math.max(0, opts.nowS - d.t) : 0;
+    if (drift > T.RSI_STALE_S) {
+      var s = rsiDown('最後一筆資料已經是 ' + fmtAge(drift) + '前，過舊，不顯示舊的提案。', '資料過舊');
+      s.state = 'stale';
+      return s;
+    }
+    if (!Array.isArray(d.proposals)) return rsiDown('樞紐讀不到提案清單，所以不能說有沒有新改動。');
+
+    var items = [], pending = 0, mergedWeek = 0;
+    d.proposals.forEach(function (p, i) {
+      if (!p || typeof p !== 'object') return;
+      var st = rsiStatus(p.status), src = rsiSource(p.kind), age = num(p.age) ? p.age + drift : null;
+      if (st === 'pending') pending++;
+      if (st === 'merged' && src === '迴圈' && age !== null && age <= T.RSI_WEEK_S) mergedWeek++;
+      var ageText = age !== null ? fmtAge(age) + '前' : '時間不明';
+      items.push({
+        id: typeof p.id === 'string' && p.id ? p.id : 'p' + i,
+        title: typeof p.title === 'string' && p.title ? p.title : '（沒有標題）',
+        impact: typeof p.summary === 'string' && p.summary ? p.summary : '影響未說明',
+        status: st, statusLabel: RSI_STATUS[st], source: src, isBranch: false, ageText: ageText,
+        rows: [['來源', src],
+          ['種類', [p.kind, p.type].filter(function (v) { return typeof v === 'string' && v; }).join(' / ') || '未提供'],
+          ['狀態原文', typeof p.status === 'string' && p.status ? p.status : '未提供'],
+          ['多久前', ageText],
+          ['編號', typeof p.id === 'string' && p.id ? p.id : '未提供']]
+      });
+    });
+    var branchesKnown = Array.isArray(d.auto_branches);
+    if (branchesKnown) d.auto_branches.forEach(function (b) {
+      if (!b || typeof b !== 'object') return;
+      var sha = typeof b.sha === 'string' ? b.sha : '';
+      var name = typeof b.name === 'string' && b.name ? b.name : '（沒有名稱）';
+      pending++;
+      items.push({
+        id: 'branch:' + name, title: name, impact: '迴圈改碼的分支，等你審過才會合併，還沒上線。',
+        status: 'pending', statusLabel: RSI_STATUS.pending, source: '迴圈', isBranch: true, ageText: '',
+        rows: [['來源', '迴圈'], ['種類', '自動分支（auto/）'], ['版本碼', sha ? sha.slice(0, 7) : '未提供']]
+      });
+    });
+    var rank = function (it) { return it.status === 'pending' ? 0 : 1; };
+    items = items.map(function (it, i) { return [it, i]; }).sort(function (a, b) { return (rank(a[0]) - rank(b[0])) || (a[1] - b[1]); })
+      .map(function (x) { return x[0]; });
+
+    var la = d.switches && typeof d.switches === 'object' ? d.switches.loop_act_off : null;
+    var loopAct = la === true ? { label: '自動改碼：已關閉', level: 'gray' } : la === false ? { label: '自動改碼：運作中', level: 'green' } : { label: '自動改碼：不明', level: 'gray' };
+    var out = { items: items, pending: pending, mergedWeek: mergedWeek, branchesKnown: branchesKnown, loopAct: loopAct,
+      notice: branchesKnown ? '' : '自動分支清單讀不到，所以下面的待審數可能少算。' };
+    if (!items.length && branchesKnown) {
+      out.state = 'empty'; out.level = 'green'; out.summary = '沒有新改動';
+      out.notice = '教練最近沒有提案，也沒有等你審的分支。';
+    } else if (!items.length) {
+      out.state = 'ok'; out.level = 'gray'; out.summary = '提案清單是空的';
+    } else {
+      out.state = 'ok'; out.level = pending > 0 ? 'green' : 'gray';
+      out.summary = '待你審' + (branchesKnown ? ' ' : '至少 ') + pending + ' 筆 · 本週自動合併 ' + mergedWeek + ' 筆';
+    }
+    return out;
+  }
+
+  var rsiProviders = {
+    demo: function (o) {
+      var sc = RSI_SCENARIOS.indexOf(o.scenario) >= 0 ? o.scenario : 'ok';
+      return {
+        name: 'demo', poll: false, scenario: sc, scenarioNote: sc !== o.scenario ? '（沒有「' + o.scenario + '」這個情境，改用 ok）' : '',
+        fetch: function () { return fetchStatus((o.base || '') + 'fixtures/rsi_' + sc + '.json', 3000, o.fetchImpl); }
+      };
+    },
+    local: function (o) {
+      var url = o.url || RSI_LOCAL_URL, tmo = o.timeoutMs || 2000;
+      return { name: 'local', poll: true, intervalMs: o.intervalMs || 15000, fetch: function () { return fetchStatus(url, tmo, o.fetchImpl); } };
+    },
+    relay: function () {
+      return { name: 'relay', poll: false, fetch: function () { return Promise.reject(bridgeError('not_implemented', '遠端中繼（relay）尚未實作，請改用示意或本機。')); } };
+    }
+  };
+
+  var RSI_DECIDE_MSG = { demo: '示意：不會真的送出', other: '尚未接上，決定要在手機 CLI 做' };
+  var RSI_CHIP = { pending: ['#c6ff00', '#0b0b0c', '#c6ff00'], merged: ['transparent', '#ffffff', '#ffffff'], rejected: ['transparent', '#ff8a5c', '#ff8a5c'], unknown: ['transparent', '#bdbdbd', '#bdbdbd'] };
+
+  function rsiRender(R, ctx) {
+    var d = root.document;
+    var q = function (k) { return d.querySelector('[data-r="' + k + '"]'); };
+    var m, h = function (tag, css, text) { var e = d.createElement(tag); if (css) e.style.cssText = css; if (text != null) e.textContent = text; return e; };
+    if ((m = q('summary'))) { m.textContent = R.summary; m.style.color = R.level === 'green' ? '#c6ff00' : '#bdbdbd'; }
+    if ((m = q('notice'))) { m.textContent = R.notice; m.style.display = R.notice ? '' : 'none'; }
+    if ((m = q('footer'))) {
+      m.textContent = '';
+      m.appendChild(h('div', 'color:' + (R.loopAct.level === 'green' ? '#c6ff00' : '#bdbdbd'), R.loopAct.label));
+      if (R.state === 'ok' || R.state === 'empty') m.appendChild(h('div', '', '只列最近 5 筆提案；目前沒有上線後自動退回的保險。'));
+    }
+    var list = q('list');
+    if (!list) return;
+    var sig = JSON.stringify([R.items, ctx.msgs]);
+    if (ctx.lastSig === sig) return; // 資料沒變就不重畫，展開中的細節與按下的提示才不會被輪詢洗掉
+    ctx.lastSig = sig;
+    list.textContent = '';
+    R.items.forEach(function (it) {
+      var card = h('div'); card.className = 'r-card'; card.setAttribute('data-id', it.id);
+      var row = h('div'); row.className = 'r-row';
+      var c = RSI_CHIP[it.status], chip = h('span', 'background:' + c[0] + ';color:' + c[1] + ';border-color:' + c[2], it.statusLabel); chip.className = 'r-chip';
+      row.appendChild(chip);
+      row.appendChild(h('span', 'color:#bdbdbd', '來源：' + it.source + (it.ageText ? ' · ' + it.ageText : '')));
+      card.appendChild(row);
+      var tt = h('div', '', it.title); tt.className = 'r-title'; card.appendChild(tt);
+      var im = h('div', '', it.impact); im.className = 'r-impact'; card.appendChild(im);
+      var det = d.createElement('details');
+      if (ctx.open[it.id]) det.open = true;
+      det.addEventListener('toggle', function () { ctx.open[it.id] = det.open; });
+      det.appendChild(h('summary', '', '看細節 ▾'));
+      var dl = d.createElement('dl');
+      it.rows.forEach(function (r) { dl.appendChild(h('dt', '', r[0])); dl.appendChild(h('dd', '', r[1])); });
+      det.appendChild(dl); card.appendChild(det);
+      var bt = h('div'); bt.className = 'r-btns';
+      [['approve', '核准'], ['reject', '退回'], ['note', '備註']].forEach(function (a) {
+        var b = h('button', '', a[1]); b.type = 'button'; b.setAttribute('data-r-act', a[0]); b.setAttribute('data-id', it.id);
+        if (it.status !== 'pending' && a[0] !== 'note') { b.disabled = true; b.title = '這一筆已經不是待審'; }
+        bt.appendChild(b);
+      });
+      card.appendChild(bt);
+      if (ctx.msgs[it.id]) { var mg = h('p', '', ctx.msgs[it.id]); mg.className = 'r-msg'; card.appendChild(mg); }
+      list.appendChild(card);
+    });
+  }
+
+  /** 啟動「教練改了什麼」頁：讀 /v1/rsi → judgeRsi → 畫面。按鈕只顯示說明，不送任何東西。 */
+  function startRsi(opts) {
+    var d = root.document;
+    if (!d || !d.querySelector('[data-r="list"]')) return null;
+    opts = opts || {};
+    var qs = new URLSearchParams(root.location ? root.location.search : '');
+    var mode = qs.get('bridge') || 'demo', note = '';
+    if (!rsiProviders[mode]) { note = '（不認得 bridge=' + mode + '，改用示意）'; mode = 'demo'; }
+    var prov = rsiProviders[mode]({ scenario: qs.get('rsi') || 'ok', fetchImpl: opts.fetchImpl, url: opts.url });
+    var label = mode === 'demo' ? '示意' : mode === 'local' ? '本機樞紐' : '遠端中繼';
+    var ctx = { open: {}, msgs: {}, lastSig: null, last: null };
+    var carry = new URLSearchParams();
+    if (qs.get('bridge')) carry.set('bridge', qs.get('bridge'));
+    if (qs.get('scenario')) carry.set('scenario', qs.get('scenario'));
+    var cs = carry.toString();
+    if (cs) [].forEach.call(d.querySelectorAll('a[href]'), function (a) {
+      var hr = a.getAttribute('href');
+      if (/^[A-Za-z_]+\.html$/.test(hr)) a.setAttribute('href', hr + '?' + cs);
+    });
+    var decide = mode === 'demo' ? RSI_DECIDE_MSG.demo : RSI_DECIDE_MSG.other;
+    d.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('button[data-r-act]');
+      if (!b || b.disabled) return;
+      ctx.msgs[b.getAttribute('data-id')] = decide;
+      if (ctx.last) rsiRender(ctx.last, ctx);
+    });
+    var src = function (extra) {
+      var s = d.querySelector('[data-r="source"]');
+      if (s) s.textContent = '資料來源：' + label + (prov.scenario ? '（情境 ' + prov.scenario + '）' : '') + (prov.scenarioNote || '') + (extra || '') + note;
+    };
+    var paint = function (R, extra) { ctx.last = R; rsiRender(R, ctx); src(extra); };
+    paint(judgeRsi(null, { loading: true }), ' · 讀取中…');
+    var timer = null, inflight = false, stopped = false;
+    function tick() {
+      if (stopped || inflight) return;
+      inflight = true;
+      prov.fetch().then(function (j) {
+        paint(judgeRsi(j, { nowS: prov.name === 'local' ? Date.now() / 1000 : undefined }), prov.name === 'local' ? ' · 更新於 ' + hhmmss(new Date()) : '');
+      }, function (e) {
+        var human = e && e.human ? e.human : '讀取失敗：' + (e && e.message ? e.message : e);
+        paint(judgeRsi(null, { error: human }), ' · 讀取失敗 ' + hhmmss(new Date())); // 失敗就顯示讀不到，不留舊提案
+      }).then(function () {
+        inflight = false;
+        if (prov.poll && !stopped && !d.hidden) timer = setTimeout(tick, prov.intervalMs);
+      });
+    }
+    if (prov.poll) {
+      d.addEventListener('visibilitychange', function () {
+        if (d.hidden) { clearTimeout(timer); timer = null; }
+        else if (!inflight) { clearTimeout(timer); tick(); }
+      });
+    }
+    tick();
+    return { stop: function () { stopped = true; clearTimeout(timer); } };
+  }
+
   if (root.document && root.document.addEventListener) {
-    var go = function () { try { start(); } catch (e) { if (root.console) root.console.error('bridge.js', e); } };
+    var go = function () { try { if (root.document.body && root.document.body.getAttribute('data-page') === 'rsi') startRsi(); else start(); } catch (e) { if (root.console) root.console.error('bridge.js', e); } };
     if (root.document.readyState === 'loading') root.document.addEventListener('DOMContentLoaded', go); else go();
   }
 
-  return { judge: judge, fmtAge: fmtAge, fetchStatus: fetchStatus, classifyError: classifyError, providers: providers, start: start, SCENARIOS: SCENARIOS, T: T, LOCAL_URL: LOCAL_URL };
+  return { judge: judge, fmtAge: fmtAge, fetchStatus: fetchStatus, classifyError: classifyError, providers: providers, start: start, judgeRsi: judgeRsi, rsiProviders: rsiProviders, startRsi: startRsi, RSI_SCENARIOS: RSI_SCENARIOS, RSI_LOCAL_URL: RSI_LOCAL_URL, SCENARIOS: SCENARIOS, T: T, LOCAL_URL: LOCAL_URL };
 });

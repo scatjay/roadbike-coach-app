@@ -94,7 +94,7 @@ def convert(stem: str, up: str = "") -> str:
 """
 
 
-V2 = {"Home": "index", "Start": "start", "Ride": "ride", "Turn": "turn", "Post": "post", "Coach": "coach"}
+V2 = {"Home": "index", "Start": "start", "Ride": "ride", "Turn": "turn", "Post": "post", "Coach": "coach", "Rsi": "rsi"}
 
 V2_HEAD = (
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
@@ -139,16 +139,17 @@ def convert_v2(stem: str) -> str:
     for k, v in V2.items():
         t = t.replace(f'href="{k}.dc.html"', f'href="{v}.html"')
     assert "dc.html" not in t and "width:390px" not in t, f"{stem} v2 還有未轉換的標記"
-    if stem in BRIDGE_PAGES:  # 這四頁由 bridge.js 填入真資料（或示意夾具）；「畫板用：切換異常」鈕只給畫板，網頁版拿掉
-        assert 'data-b="' in t, f"{stem} 沒有 data-b 綁定點"
+    if stem in BRIDGE_PAGES:  # 這幾頁由 bridge.js 填入真資料（或示意夾具）；「畫板用：切換異常」鈕只給畫板，網頁版拿掉
+        mark = 'data-r="' if stem == "Rsi" else 'data-b="'  # 「教練改了什麼」用 data-r（由 startRsi 綁定，不走 status 判讀）
+        assert mark in t, f"{stem} 沒有 {mark} 綁定點"
         t, n = re.subn(r'<button id="t" type="button"[^>]*>（畫板用：切換異常）</button>\n?', "", t)
-        assert n == (0 if stem == "Home" else 1), f"{stem} 切換異常鈕數量不對：{n}"
+        assert n == (0 if stem in ("Home", "Rsi") else 1), f"{stem} 切換異常鈕數量不對：{n}"
     t = t.replace('<body>', '<body data-page="' + V2[stem] + '">', 1)
     assert t.count("</body>") == 1
     return t.replace("</body>", V2_TAIL)
 
 
-BRIDGE_PAGES = ("Home", "Start", "Ride", "Turn")
+BRIDGE_PAGES = ("Home", "Start", "Ride", "Turn", "Rsi")
 FIXTURE_JS = """/* 由 tools/build.py 從 design_v2/fixtures/status_*.json 產生，不要手改。示意資料：沒有任何座標、位置或金鑰。
  * 契約來源：公路車專案 phone-agent/hub_fixtures（schema:1）。 */
 (function (root, data) {
@@ -169,8 +170,17 @@ def build_fixtures():
         data[p.stem[len("status_"):]] = obj
         (OUT / "fixtures" / p.name).write_text(json.dumps(obj, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     assert len(data) == 5, f"夾具應有 5 個，實際 {len(data)}"
+    nr = 0  # 「教練改了什麼」夾具：只複製 JSON（頁面用 fetch 讀 fixtures/rsi_*.json）
+    for p in sorted((ROOT / "design_v2" / "fixtures").glob("rsi_*.json")):
+        obj = json.loads(p.read_text(encoding="utf-8"))
+        assert obj.get("schema") == 1, f"{p.name} schema 不是 1"
+        blob = json.dumps(obj, ensure_ascii=False)
+        assert not re.search(r'"(lat|lon|lng|latitude|longitude|token|key|secret)"', blob, re.I), f"{p.name} 含座標或金鑰欄位"
+        (OUT / "fixtures" / p.name).write_text(json.dumps(obj, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+        nr += 1
+    assert nr == 3, f"rsi 夾具應有 3 個，實際 {nr}"
     (OUT / "bridge_fixtures.js").write_text(FIXTURE_JS % json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
-    print("寫出 bridge_fixtures.js 與 fixtures/", len(data), "個")
+    print("寫出 bridge_fixtures.js 與 fixtures/", len(data), "個狀態夾具 +", nr, "個 rsi 夾具")
 
 
 def main():

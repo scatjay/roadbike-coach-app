@@ -1,0 +1,45 @@
+{
+ "schema": 1,
+ "t": 1783000000.5,
+ "proposals": [
+  {
+   "id": "demo-p3",
+   "kind": "loop_proposal",
+   "type": "threshold",
+   "title": "雨區提示提早發出",
+   "status": "pending",
+   "summary": "雨區提示改成更早通知，騎乘中少一次臨時閃躲（示意）",
+   "age": 7200.0
+  },
+  {
+   "id": "demo-p2",
+   "kind": "loop_act",
+   "type": "text",
+   "title": "折返點文案改成倒數",
+   "status": "merged",
+   "summary": "折返點提示改用「剩多遠」的說法，已自動合併（示意）",
+   "age": 86400.0
+  },
+  {
+   "id": "demo-p1",
+   "kind": "cli_change",
+   "type": "gate",
+   "title": "補給提醒放寬一格",
+   "status": "rejected",
+   "summary": "補給提醒門檻放寬，被驗證器退回（示意）",
+   "age": 259200.0
+  }
+ ],
+ "candidates": null,
+ "auto_branches": [
+  {
+   "name": "auto/demo-sample-branch",
+   "sha": "0123456789abcdef0123456789abcdef01234567"
+  }
+ ],
+ "switches": {
+  "loop_act_off": false,
+  "stability": null
+ },
+ "spend": null
+}
