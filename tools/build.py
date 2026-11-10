@@ -127,6 +127,15 @@ def convert_v2(stem: str) -> str:
     assert '<meta name="viewport" content="width=390">' in t, f"{stem} 找不到 viewport"
     t = t.replace('<meta name="viewport" content="width=390">', V2_HEAD)
     t = t.replace("width:390px;height:844px;", "width:100%;max-width:430px;min-height:100dvh;margin:0 auto;")
+    # 字型樣式表會擋住首次繪製（換頁黑屏的主因）：改成不擋，字型載好再換；fallback 字型本來就在字型串裡
+    def _font(m):
+        u = m.group(1)
+        return ("<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">" + chr(10)
+                + "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" + chr(10)
+                + "<link rel=\"stylesheet\" href=\"" + u + "\" media=\"print\" onload=\"this.media='all'\">" + chr(10)
+                + "<noscript><link rel=\"stylesheet\" href=\"" + u + "\"></noscript>")
+    t, nf = re.subn(r'<link rel="stylesheet" href="(https://fonts\.googleapis\.com[^"]+)">', _font, t)
+    assert nf == 1, f"{stem} 字型連結數量不對：{nf}"
     for k, v in V2.items():
         t = t.replace(f'href="{k}.dc.html"', f'href="{v}.html"')
     assert "dc.html" not in t and "width:390px" not in t, f"{stem} v2 還有未轉換的標記"

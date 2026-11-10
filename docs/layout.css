@@ -25,3 +25,10 @@ body button[data-b-full],body>div>div:first-child>button{height:auto!important;m
 @keyframes vt-out{to{opacity:0;transform:translateX(var(--vt-x-out,-28px))}}
 @keyframes vt-in{from{opacity:0;transform:translateX(var(--vt-x-in,28px))}}
 @media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}
+/* ── 一屏看完：效率優先（2026-11-10 晚）──
+ * 資料列壓緊、主要動作鈕釘在底部導覽上方，下面的內容不必往下捲才找得到按鈕。 */
+details>div{padding:2px 0!important;line-height:1.2}
+details>div span[data-b^="row-"] span{margin-top:0;line-height:1.2}
+details>summary{padding:2px 0!important}
+body>div>div:first-child{gap:12px!important}
+body button[data-b-full]{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:4;background:#0b0b0c}
