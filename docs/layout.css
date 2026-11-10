@@ -37,3 +37,6 @@ details>div>span:first-child{flex:1;min-width:0;padding-right:10px}
 details>div{align-items:flex-start}
 /* 登出鈕跟著頁面捲走，不再蓋住標題 */
 #gOut{position:absolute!important}
+/* 出發點：口袋前最後一眼，四項狀態與動作鈕必須一屏看完（拿掉頂端裝飾說明行、說明句縮一級） */
+body[data-page="start"] [style*="--i:0"]{display:none!important}
+body[data-page="start"] [data-b="detail"]{font-size:20px!important;line-height:1.35!important}

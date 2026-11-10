@@ -143,6 +143,7 @@ def convert_v2(stem: str) -> str:
         assert 'data-b="' in t, f"{stem} 沒有 data-b 綁定點"
         t, n = re.subn(r'<button id="t" type="button"[^>]*>（畫板用：切換異常）</button>\n?', "", t)
         assert n == (0 if stem == "Home" else 1), f"{stem} 切換異常鈕數量不對：{n}"
+    t = t.replace('<body>', '<body data-page="' + V2[stem] + '">', 1)
     assert t.count("</body>") == 1
     return t.replace("</body>", V2_TAIL)
 
