@@ -1,11 +1,12 @@
 /* bridge.js：把「手機樞紐」GET /v1/status 讀成教練／感測器／手環／車表四項判讀（綠＝有證據、灰＝不確定、紅＝有反證）。
  * 判讀規則出處：公路車專案 knowledge/coach_renewal_20261109/29_app_ridebridge.md §4.1；欄位以 phone-agent/hub_fixtures 契約為準。
  * 三種資料來源（用網址參數切）：
- *   預設            示意（內建夾具；?scenario=ok|band_unconfirmed|coach_silent|riding|bridge_down）
+ *   預設            本機樞紐（真實資料；讀不到就照實顯示讀不到，不顯示任何假數字）
+ *   ?bridge=demo    內建夾具（只給設計與測試用；?scenario=ok|band_unconfirmed|coach_silent|riding|bridge_down）
  *   ?bridge=local   本機樞紐 http://127.0.0.1:8790/v1/status，每 5 秒輪詢、逾時 2 秒、頁面不可見時暫停
  *   ?bridge=relay   遠端中繼（介面先留，尚未實作）
  * 「教練改了什麼」頁（rsi.html，body[data-page=rsi]）另有 judgeRsi() 與 rsiProviders：
- *   預設            示意（fixtures/rsi_ok.json；?rsi=ok|empty|unavailable 切換）
+ *   預設            本機樞紐；?bridge=demo 才讀 fixtures/rsi_ok.json（?rsi=ok|empty|unavailable 切換）
  *   ?bridge=local   本機樞紐 http://127.0.0.1:8790/v1/rsi，每 15 秒輪詢、逾時 2 秒、頁面不可見時暫停
  * judge() 是純函式，node 也能直接 require 跑（見 tools/test_bridge.js）。
  * 原則：算不出來的不顯示；手環沒有任何讀值能證明「震了」，所以永遠不會是綠；公開倉庫，這裡沒有任何座標或金鑰。 */
@@ -159,9 +160,9 @@
       main = '教練或感測器還不能確定'; level = 'gray';
       detail = '教練：' + coach.ageText + '；感測器：' + sensor.ageText + '。';
     } else {
-      main = '教練與感測器正常' + SEP + (headunit.level === 'green' ? '手環請確認' : '手環與車表請確認');
+      main = '教練與感測器正常' + SEP + (headunit.level === 'green' ? '車表請確認' : '先叫醒車表');
       level = 'green'; out.canPocket = true;
-      detail = '手環沒有讀值能證明，請震一下確認。';
+      detail = '按下面的鈕，確認車表有字、有聲音。';
     }
     out.main = main; out.mainLines = main.split(SEP); out.level = level; out.detail = riding ? '' : detail;
 
@@ -329,9 +330,9 @@
     if (!d || !d.querySelectorAll('[data-b]').length) return null;
     opts = opts || {};
     var qs = new URLSearchParams(root.location ? root.location.search : '');
-    var mode = qs.get('bridge') || 'demo';
+    var mode = qs.get('bridge') || 'local';
     var note = '';
-    if (!providers[mode]) { note = '（不認得 bridge=' + mode + '，改用示意）'; mode = 'demo'; }
+    if (!providers[mode]) { note = '（不認得 bridge=' + mode + '，改讀本機樞紐）'; mode = 'local'; }
     var prov = providers[mode]({ scenario: qs.get('scenario') || 'ok', fixtures: opts.fixtures, fetchImpl: opts.fetchImpl, url: opts.url });
     var ctx = { sourceText: '', lastMainKey: null };
     var label = mode === 'demo' ? '示意' : mode === 'local' ? '本機樞紐' : '遠端中繼';
@@ -347,10 +348,7 @@
         if (/^[A-Za-z_]+\.html$/.test(h)) a.setAttribute('href', h + '?' + cs);
       });
     }
-    // 「震一下」目前沒有接線：不能說「已送出」
-    [].forEach.call(d.querySelectorAll('[data-b="ok"]'), function (el) {
-      el.textContent = mode === 'demo' ? '示意：不會真的震動手環' : '這個頁面目前只讀狀態，這顆鈕還沒接上，不會震動手環';
-    });
+    // 「傳到車表」鈕（11-18 起接線，見 RBHeadSay）：點下去才由 RBHeadSay 寫結果；這裡不再預先覆寫文字
 
     var timer = null, inflight = false, stopped = false;
     function paint(R, srcText) { ctx.sourceText = srcText; bindPage(R, ctx); }
@@ -544,8 +542,8 @@
     if (!d || !d.querySelector('[data-r="list"]')) return null;
     opts = opts || {};
     var qs = new URLSearchParams(root.location ? root.location.search : '');
-    var mode = qs.get('bridge') || 'demo', note = '';
-    if (!rsiProviders[mode]) { note = '（不認得 bridge=' + mode + '，改用示意）'; mode = 'demo'; }
+    var mode = qs.get('bridge') || 'local', note = '';
+    if (!rsiProviders[mode]) { note = '（不認得 bridge=' + mode + '，改讀本機樞紐）'; mode = 'local'; }
     var prov = rsiProviders[mode]({ scenario: qs.get('rsi') || 'ok', fetchImpl: opts.fetchImpl, url: opts.url });
     var label = mode === 'demo' ? '示意' : mode === 'local' ? '本機樞紐' : '遠端中繼';
     var ctx = { open: {}, msgs: {}, lastSig: null, last: null };
@@ -614,5 +612,50 @@
     if (root.document.readyState === 'loading') root.document.addEventListener('DOMContentLoaded', go); else go();
   }
 
-  return { judge: judge, fmtAge: fmtAge, fetchStatus: fetchStatus, classifyError: classifyError, providers: providers, start: start, judgeRsi: judgeRsi, rsiProviders: rsiProviders, startRsi: startRsi, RSI_SCENARIOS: RSI_SCENARIOS, RSI_LOCAL_URL: RSI_LOCAL_URL, SCENARIOS: SCENARIOS, T: T, LOCAL_URL: LOCAL_URL };
+
+  /* ── 傳到車表（含語音）：POST 本機樞紐 /v1/head_say ─────────────────────────────
+   * 11-18 楊老師：「我按 APP 要可以傳訊車表、也要有語音」。只送白名單種類（目前只有 check），不送任何自由文字。
+   * 結果照實說：樞紐只能回「廣播送出去了」「語音叫起來了」，車表有沒有顯示、有沒有聲音，要人眼耳確認。
+   * 配對碼：手機 /sdcard/Download/hub_pair.txt 裡那串；貼一次，記在這支手機的 localStorage（倉庫公開，碼不在倉庫裡）。 */
+  var HEAD_SAY_URL = 'http://127.0.0.1:8790/v1/head_say';
+  function headSayMessage(status, j) {
+    if (status === 200 && j && j.ok) {
+      if (j.head_sent && j.voice_started) return { bad: false, text: '已送出「' + (j.text || '') + '」。請確認：車表有出現字、耳機或喇叭有唸。' };
+      if (j.head_sent) return { bad: true, text: '車表那條送出了，但語音沒叫起來。請確認車表有出現字。' };
+      return { bad: true, text: '語音叫起來了，但車表那條沒送出（先叫醒車表）。' };
+    }
+    if (status === 200) return { bad: true, text: '兩條都沒送出：車表和語音都沒動。' };
+    if (status === 401) return { bad: true, text: '配對碼不對，沒有送出。請重按再貼一次。', clearToken: true };
+    if (status === 429) return { bad: true, text: '按太快了，等一分鐘再按。' };
+    if (status === 409) return { bad: true, text: '樞紐在模擬模式，沒有送出。' };
+    return { bad: true, text: '沒有送出（' + status + ' ' + ((j && j.error) || '') + '）。' };
+  }
+  var HeadSay = {
+    message: headSayMessage,
+    send: function (okEl, btn, opts) {
+      opts = opts || {};
+      var f = opts.fetchImpl || root.fetch, tok = '', st = opts.storage || root.localStorage, pr = opts.promptFn || root.prompt;
+      function show(msg, bad) { okEl.textContent = msg; okEl.style.display = 'block'; okEl.style.color = bad ? '#ff8a5c' : '#c6ff00'; }
+      try { tok = (st && st.getItem('rbc_tok')) || ''; } catch (x) {}
+      if (!tok) tok = ((pr && pr('貼上手機 hub_pair.txt 裡的配對碼（只問這一次，記在這支手機上）')) || '').trim();
+      if (!tok) { show('沒有配對碼，沒有送出。', true); return Promise.resolve(false); }
+      if (btn) btn.disabled = true;
+      show('送出中…', false);
+      var ctl = root.AbortController ? new root.AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 6000) : null;
+      return f(HEAD_SAY_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify({ kind: 'check' }), signal: ctl ? ctl.signal : undefined
+      }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }, function () { return { s: r.status, j: null }; }); })
+        .then(function (o) {
+          var m = headSayMessage(o.s, o.j);
+          if (o.s === 200 && o.j && o.j.ok) { try { st && st.setItem('rbc_tok', tok); } catch (x) {} }
+          if (m.clearToken) { try { st && st.removeItem('rbc_tok'); } catch (x) {} }
+          show(m.text, m.bad); return !m.bad;
+        }, function () { show('連不到手機樞紐，沒有送出。（樞紐沒開，或瀏覽器擋了本機連線）', true); return false; })
+        .then(function (okv) { if (timer) clearTimeout(timer); if (btn) btn.disabled = false; return okv; });
+    }
+  };
+
+  root.RBHeadSay = HeadSay;
+  return { HeadSay: HeadSay, judge: judge, fmtAge: fmtAge, fetchStatus: fetchStatus, classifyError: classifyError, providers: providers, start: start, judgeRsi: judgeRsi, rsiProviders: rsiProviders, startRsi: startRsi, RSI_SCENARIOS: RSI_SCENARIOS, RSI_LOCAL_URL: RSI_LOCAL_URL, SCENARIOS: SCENARIOS, T: T, LOCAL_URL: LOCAL_URL };
 });

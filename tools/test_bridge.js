@@ -24,7 +24,7 @@ for (const sc of B.SCENARIOS) {
 }
 
 console.log('\n== 情境斷言');
-ok(R.ok.main === '教練與感測器正常　手環請確認', 'ok 主訊息');
+ok(R.ok.main === '教練與感測器正常　車表請確認', 'ok 主訊息');
 ok(line(R.ok) === 'coach=green sensor=green band=gray headunit=green', 'ok 燈號');
 ok(R.ok.canPocket === true, 'ok 可以收進口袋');
 ok(R.band_unconfirmed.items.band.level === 'gray' && /280 秒前送出/.test(R.band_unconfirmed.items.band.ageText), 'band_unconfirmed 手環維持灰且說 280 秒前送出');
@@ -48,7 +48,7 @@ r = mut(s => s.bridge.health.sensors.hr_age = null); ok(r.items.sensor.level ===
 r = mut(s => s.bridge.health.sensors.conn_age = 6000); ok(r.items.sensor.level === 'red', 'conn_age=6000：紅（橋接聾了）');
 r = mut(s => s.bridge.health.sensors.conn_age = 100); ok(r.items.sensor.level === 'gray', 'conn_age=100：灰');
 r = mut(s => s.bridge.health.sensors.conn_age = null); ok(r.items.sensor.level === 'gray', 'conn_age=null：灰');
-r = mut(s => s.bridge.health.headunit.dev_age = 20); ok(r.items.headunit.level === 'gray' && r.main === '教練與感測器正常　手環與車表請確認', 'dev_age=20：車表灰，主訊息改成手環與車表請確認');
+r = mut(s => s.bridge.health.headunit.dev_age = 20); ok(r.items.headunit.level === 'gray' && r.main === '教練與感測器正常　先叫醒車表', 'dev_age=20：車表灰，主訊息改成先叫醒車表');
 r = mut(s => { s.bridge.health.headunit.dev_age = null; s.bridge.health.headunit.dev_n = 0; }); ok(r.items.headunit.level === 'gray', 'dev_n=0：車表灰');
 r = mut(s => { s.bridge.health.headunit.dev_age = 20; s.bridge.health.headunit.tx_age = 10; }); ok(r.items.headunit.level === 'gray' && /不代表已顯示/.test(r.items.headunit.ageText), '只有剛送出（弱證據）：灰且說不代表已顯示');
 r = mut(s => s.bridge.health.headunit.tx = '逾時，斷開'); ok(r.items.headunit.level === 'red' && r.main === '車表送出失敗', 'tx=逾時，斷開：車表紅');
@@ -167,5 +167,34 @@ console.log('\n== 錯誤要說人話（注入假 fetch）');
   q = B.judgeRsi(null, { error: be.human }); ok(q.state === 'unavailable' && q.notice === be.human && q.items.length === 0, '連不上 → 灰色讀不到，不留舊提案');
   const rl = B.rsiProviders.relay({}); let re2 = null; try { await rl.fetch(); } catch (x) { re2 = x; } ok(re2 && re2.code === 'not_implemented', 'rsi relay：尚未實作');
 
+  // ── 傳到車表（含語音）RBHeadSay：訊息要照實說，不能把「廣播送出」說成「車表已顯示」
+  const HS = B.HeadSay;
+  ok(HS && typeof HS.send === 'function' && typeof HS.message === 'function', 'HeadSay 已匯出');
+  let hm = HS.message(200, { ok: true, head_sent: true, voice_started: true, text: '通道測試 22:50' });
+  ok(!hm.bad && /通道測試 22:50/.test(hm.text) && /請確認/.test(hm.text), '兩條都送出：不說「已顯示」，要請人確認');
+  hm = HS.message(200, { ok: true, head_sent: true, voice_started: false });
+  ok(hm.bad && /語音沒叫起來/.test(hm.text), '只有車表：提醒語音沒起來');
+  hm = HS.message(200, { ok: true, head_sent: false, voice_started: true });
+  ok(hm.bad && /車表那條沒送出/.test(hm.text), '只有語音：提醒車表沒送出');
+  hm = HS.message(200, { ok: false, head_sent: false, voice_started: false });
+  ok(hm.bad && /兩條都沒送出/.test(hm.text), '兩條都失敗：照實說');
+  hm = HS.message(401, { error: 'unauthorized' });
+  ok(hm.bad && hm.clearToken === true, '401：清掉記住的配對碼');
+  ok(HS.message(429, {}).bad && HS.message(409, {}).bad && HS.message(500, { error: 'internal' }).bad, '429／409／500 都是失敗');
+  const store = {};
+  const storage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = v; }, removeItem: k => { delete store[k]; } };
+  const promptFn = () => '';
+  const okEl = { style: {}, textContent: '' };
+  let called = 0, sent = null;
+  const R0 = await HS.send(okEl, null, { storage, promptFn, fetchImpl: () => { called++; return Promise.resolve({}); } });
+  ok(R0 === false && called === 0 && /沒有配對碼/.test(okEl.textContent), '沒有配對碼：不送出、不打網路');
+  store.rbc_tok = 'T0K';
+  const R1 = await HS.send(okEl, null, { storage, promptFn, fetchImpl: (u, o) => { called++; sent = o; return Promise.resolve({ status: 200, json: () => Promise.resolve({ ok: true, head_sent: true, voice_started: true, text: '通道測試 23:00' }) }); } });
+  ok(R1 === true && called === 1 && Object.keys(JSON.parse(sent.body)).join() === 'kind' && JSON.parse(sent.body).kind === 'check' && /Bearer T0K/.test(sent.headers.Authorization), '送出只帶白名單 kind=check（沒有自由文字）、帶配對碼');
+  ok(/通道測試 23:00/.test(okEl.textContent), '成功訊息顯示樞紐回的句子');
+  const R2 = await HS.send(okEl, null, { storage, promptFn, fetchImpl: () => Promise.reject(new TypeError('Failed to fetch')) });
+  ok(R2 === false && /連不到手機樞紐/.test(okEl.textContent), '連不上：照實說，不說已送出');
+  const R3 = await HS.send(okEl, null, { storage, promptFn, fetchImpl: () => Promise.resolve({ status: 401, json: () => Promise.resolve({ error: 'unauthorized' }) }) });
+  ok(R3 === false && !store.rbc_tok, '401 後記住的配對碼被清掉');
   console.log(fails ? `\n失敗 ${fails} 項` : '\n全部通過'); process.exit(fails ? 1 : 0);
 })();
