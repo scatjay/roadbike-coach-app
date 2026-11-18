@@ -622,7 +622,10 @@
   var HEAD_SAY_URL = 'http://127.0.0.1:8790/v1/head_say';
   function headSayMessage(status, j) {
     if (status === 200 && j && j.ok) {
-      if (j.head_sent && j.voice_started) return { bad: false, text: '已送出「' + (j.text || '') + '」。請確認：車表有出現字、耳機或喇叭有唸。' };
+      var hr = j.head_result && j.head_result.state;
+      if (hr === 'fail') return { bad: true, text: '車表沒收到（藍牙逾時或斷開）：車表沒開、休眠或不在範圍。' + (j.voice_started ? '語音有唸，但車表沒有字。' : '') + '先按一下車表叫醒，再按一次。' };
+      if (j.head_sent && j.voice_started && hr === 'ok') return { bad: false, text: '車表藍牙已送達「' + (j.text || '') + '」，語音也唸了。請再看車表有出現字。' };
+      if (j.head_sent && j.voice_started) return { bad: false, text: '已送出「' + (j.text || '') + '」，但沒法確認車表有沒有收到。請確認：車表有出現字、耳機或喇叭有唸。' };
       if (j.head_sent) return { bad: true, text: '車表那條送出了，但語音沒叫起來。請確認車表有出現字。' };
       return { bad: true, text: '語音叫起來了，但車表那條沒送出（先叫醒車表）。' };
     }
