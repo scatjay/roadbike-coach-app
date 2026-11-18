@@ -101,7 +101,11 @@
     var conn = sn ? age(sn.conn_age) : null;
     var hr = sn ? age(sn.hr_age) : null;
     if (!sn || conn === null) sensor = mk('gray', '不確定', '感測器沒連過');
-    else if (conn > T.DEAF_S) sensor = mk('red', '橋接沒反應', '感測器 ' + fmtAge(conn) + '沒資料');
+    else if (conn > T.DEAF_S) {
+      /* 橋接本身是好的（上面已確認 /health 讀得到）；感測器長時間沒資料只代表「沒戴、不在範圍、或 RideBridge 沒在掃描」，不是橋接壞了 */
+      if (sn.scanning === false) sensor = mk('gray', '沒在掃描', '感測器 ' + fmtAge(conn) + '沒資料，RideBridge 沒在掃描');
+      else sensor = mk('gray', '沒收到', '感測器 ' + fmtAge(conn) + '沒資料（沒戴心率帶、或不在範圍內）');
+    }
     else if (conn <= T.CONN_OK_S && hr !== null && hr < T.HR_OK_S) sensor = mk('green', '已連線', '心率 ' + fmtAge(hr) + '前');
     else if (conn <= T.CONN_OK_S) sensor = mk('gray', '不確定', '連著，但心率資料過舊或沒有');
     else sensor = mk('gray', '不確定', '連線資料過舊');
@@ -152,13 +156,11 @@
     } else if (coach.level === 'red') {
       main = '教練沒回應'; level = 'red';
       detail = (pidAlive === false ? '教練行程不在，' : '教練行程還在，可能卡住，') + coach.ageText + '。先叫醒教練。';
-    } else if (sensor.level === 'red') {
-      main = '感測器橋接沒反應'; level = 'red'; detail = sensor.ageText + '。重開 RideBridge。';
     } else if (headunit.level === 'red') {
       main = '車表送出失敗'; level = 'red'; detail = '先叫醒車表，再震一下確認。';
     } else if (coach.level !== 'green' || sensor.level !== 'green') {
-      main = '教練或感測器還不能確定'; level = 'gray';
-      detail = '教練：' + coach.ageText + '；感測器：' + sensor.ageText + '。';
+      main = coach.level === 'green' && (sensor.label === '沒在掃描' || sensor.label === '沒收到') ? '教練在線' + SEP + '感測器還沒連上' : '教練或感測器還不能確定'; level = 'gray';
+      detail = '教練：' + coach.ageText + '；感測器：' + sensor.ageText + '。' + (sensor.label === '沒在掃描' ? '出門前要重新掃描感測器，再戴上心率帶、轉一下曲柄。' : sensor.label === '沒收到' ? '出門前戴上心率帶、轉一下曲柄。' : '');
     } else {
       main = '教練與感測器正常' + SEP + (headunit.level === 'green' ? '車表請確認' : '先叫醒車表');
       level = 'green'; out.canPocket = true;

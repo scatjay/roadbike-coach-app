@@ -45,7 +45,10 @@ r = mut(s => s.bridge.health.coach.silent_s = null); ok(r.items.coach.level === 
 r = mut(s => s.coach.pid_alive = false); ok(r.items.coach.level === 'gray', '行程不在卻剛有動靜：灰（矛盾不當綠）');
 r = mut(s => s.bridge.health.sensors.hr_age = 61); ok(r.items.sensor.level === 'gray' && r.canPocket === false, 'hr_age=61：感測器灰、不能收口袋');
 r = mut(s => s.bridge.health.sensors.hr_age = null); ok(r.items.sensor.level === 'gray', 'hr_age=null：灰');
-r = mut(s => s.bridge.health.sensors.conn_age = 6000); ok(r.items.sensor.level === 'red', 'conn_age=6000：紅（橋接聾了）');
+r = mut(s => { s.bridge.health.sensors.conn_age = 6000; s.bridge.health.sensors.scanning = true; }); ok(r.items.sensor.level === 'gray' && r.items.sensor.label === '沒收到' && /沒戴心率帶/.test(r.items.sensor.ageText), 'conn_age=6000（掃描中）：灰「沒收到」，說是沒戴或不在範圍，不說橋接壞了');
+ok(r.level === 'gray' && /感測器還沒連上/.test(r.main) && /戴上心率帶/.test(r.detail), '主訊息：教練在線、感測器還沒連上，並教出門前怎麼做');
+r = mut(s => { s.bridge.health.sensors.conn_age = 258412; s.bridge.health.sensors.scanning = false; }); ok(r.items.sensor.level === 'gray' && r.items.sensor.label === '沒在掃描' && /重新掃描/.test(r.detail), 'RideBridge 沒在掃描：灰「沒在掃描」，並說出門前要重新掃描（不是橋接壞了）');
+r = mut(s => { s.bridge.health = null; s.bridge.ok = false; s.bridge.error = 'connect_refused'; }); ok(r.level === 'gray' && r.main === '讀不到橋接' && /連不上 RideBridge/.test(r.detail), '真的連不上 RideBridge：灰色「讀不到橋接」並說明 App 可能沒開（連不上時不能斷定，所以不是紅）');
 r = mut(s => s.bridge.health.sensors.conn_age = 100); ok(r.items.sensor.level === 'gray', 'conn_age=100：灰');
 r = mut(s => s.bridge.health.sensors.conn_age = null); ok(r.items.sensor.level === 'gray', 'conn_age=null：灰');
 r = mut(s => s.bridge.health.headunit.dev_age = 20); ok(r.items.headunit.level === 'gray' && r.main === '教練與感測器正常　先叫醒車表', 'dev_age=20：車表灰，主訊息改成先叫醒車表');
