@@ -45,7 +45,7 @@ s.textContent=bad?'已靜默 6 分鐘':'車表最後推送 41 秒前';};
 var ZB=['#9bbac7','#25756a','#b7c24e','#f0c443','#ee8a3c','#c4392c','#7b2b5a'],ZT=['#9bbac7','#5fc4b4','#d4e060','#f0c443','#ee8a3c','#ff8a7a','#d58ac0'];
 var note=document.getElementById('gnote'),plan=document.getElementById('gplan'),seg=document.getElementById('gseg'),alan=document.getElementById('galan'),ttl=document.getElementById('gtitle');
 if(!seg)return;var D=null,mode='P',idx=0;
-var bar=document.createElement('div');bar.style.cssText='position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr 1fr 1fr;z-index:5;border-top:2px solid #2a2a2d;background:#141416';
+var bar=document.createElement('footer');bar.id='gbar';bar.style.cssText='position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr 1fr 1fr;z-index:5;border-top:2px solid #2a2a2d;background:#141416;height:64px;margin:0;padding:0';
 function mk(t){var b=document.createElement('button');b.type='button';b.textContent=t;b.style.cssText='min-height:64px;font:900 24px/1.2 inherit;border:0;border-left:1px solid #2a2a2d;color:#fff;background:#141416';bar.appendChild(b);return b}
 var bB=mk('◀ 落後'),bP=mk('我的目標'),bL=mk('領先 ▶');document.body.appendChild(bar);
 function paintBtn(b,on){b.style.background=on?'#4cc3cd':'#141416';b.style.color=on?'#06181b':'#fff'}
