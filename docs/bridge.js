@@ -638,23 +638,38 @@
       opts = opts || {};
       var f = opts.fetchImpl || root.fetch, tok = '', st = opts.storage || root.localStorage, pr = opts.promptFn || root.prompt;
       function show(msg, bad) { okEl.textContent = msg; okEl.style.display = 'block'; okEl.style.color = bad ? '#ff8a5c' : '#c6ff00'; }
+      var pairUrl = HEAD_SAY_URL.replace('/v1/head_say', '/v1/pair');
+      function autoPair() {  // 向本機樞紐自動取配對碼（樞紐只對 APP 的正式來源回）；失敗回空字串
+        return Promise.resolve().then(function () { return f(pairUrl); }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) { return (j && j.token) || ''; }, function () { return ''; });
+      }
+      function post(t) {
+        var ctl = root.AbortController ? new root.AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 6000) : null;
+        return f(HEAD_SAY_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t },
+          body: JSON.stringify({ kind: 'check' }), signal: ctl ? ctl.signal : undefined
+        }).then(function (r) { if (timer) clearTimeout(timer); return r.json().then(function (j) { return { s: r.status, j: j }; }, function () { return { s: r.status, j: null }; }); },
+          function (e) { if (timer) clearTimeout(timer); throw e; });
+      }
       try { tok = (st && st.getItem('rbc_tok')) || ''; } catch (x) {}
-      if (!tok) tok = ((pr && pr('貼上手機 hub_pair.txt 裡的配對碼（只問這一次，記在這支手機上）')) || '').trim();
-      if (!tok) { show('沒有配對碼，沒有送出。', true); return Promise.resolve(false); }
       if (btn) btn.disabled = true;
       show('送出中…', false);
-      var ctl = root.AbortController ? new root.AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 6000) : null;
-      return f(HEAD_SAY_URL, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
-        body: JSON.stringify({ kind: 'check' }), signal: ctl ? ctl.signal : undefined
-      }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }, function () { return { s: r.status, j: null }; }); })
-        .then(function (o) {
-          var m = headSayMessage(o.s, o.j);
-          if (o.s === 200 && o.j && o.j.ok) { try { st && st.setItem('rbc_tok', tok); } catch (x) {} }
+      return Promise.resolve(tok || autoPair()).then(function (t0) {
+        if (!t0) { t0 = ((pr && pr('自動配對失敗。貼上手機 hub_pair.txt 裡的配對碼（只問這一次，記在這支手機上）')) || '').trim(); }
+        if (!t0) { show('沒有配對碼，沒有送出。', true); return false; }
+        return post(t0).then(function (o) {
+          if (o.s === 401) {  // 碼過期（樞紐重啟會換碼）：清掉舊的，自動重新配對一次
+            try { st && st.removeItem('rbc_tok'); } catch (x) {}
+            return autoPair().then(function (t1) { return t1 ? post(t1).then(function (o2) { return { o: o2, t: t1 }; }) : { o: o, t: '' }; });
+          }
+          return { o: o, t: t0 };
+        }).then(function (z) {
+          var o = z.o, m = headSayMessage(o.s, o.j);
+          if (o.s === 200 && o.j && o.j.ok) { try { st && st.setItem('rbc_tok', z.t); } catch (x) {} }
           if (m.clearToken) { try { st && st.removeItem('rbc_tok'); } catch (x) {} }
           show(m.text, m.bad); return !m.bad;
-        }, function () { show('連不到手機樞紐，沒有送出。（樞紐沒開，或瀏覽器擋了本機連線）', true); return false; })
-        .then(function (okv) { if (timer) clearTimeout(timer); if (btn) btn.disabled = false; return okv; });
+        });
+      }).then(function (okv) { if (btn) btn.disabled = false; return okv; },
+        function () { if (btn) btn.disabled = false; show('連不到手機樞紐，沒有送出。（樞紐沒開，或瀏覽器擋了本機連線）', true); return false; });
     }
   };
 

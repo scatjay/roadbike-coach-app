@@ -34,17 +34,20 @@ s.textContent=bad?'已靜默 6 分鐘':'車表最後推送 41 秒前';};
 (function(){
 var ZB=['#9bbac7','#25756a','#b7c24e','#f0c443','#ee8a3c','#c4392c','#7b2b5a'],ZT=['#9bbac7','#5fc4b4','#d4e060','#f0c443','#ee8a3c','#ff8a7a','#d58ac0'],ZN=['Z1 恢復','Z2 耐力','Z3 節奏','Z4 閾值','Z5 VO2','Z6 無氧','Z7 衝刺'];
 var tabs=document.getElementById('gtabs'),note=document.getElementById('gnote'),plan=document.getElementById('gplan'),seg=document.getElementById('gseg');
-if(!tabs)return;var D=null,V='l';
-var LAB=[['m','11/14 實測'],['l','領先：前一名'],['a','領先：Alan'],['b','落後：比你慢的']];
+if(!tabs)return;var D=null,V='L';
+var LAB=[['L','領先車友'],['b','落後車友'],['m','我的實測']];
 function chip(k,t){var b=document.createElement('button');b.type='button';b.textContent=t;b.style.cssText='min-height:52px;font:800 20px/1.2 inherit;border:2px solid #3a3a3d;background:'+(V===k?'#4cc3cd':'#141416')+';color:'+(V===k?'#06181b':'#fff')+';padding:4px 6px';b.onclick=function(){V=k;draw()};return b}
 function draw(){tabs.textContent='';LAB.forEach(function(x){tabs.appendChild(chip(x[0],x[1]))});
  if(!D){plan.style.display='';seg.style.display='none';note.textContent='讀不到手機樞紐，先顯示今天計畫（完整版在「今天」頁）。';return}
  plan.style.display='none';seg.style.display='';seg.textContent='';
- if(V==='b'){note.textContent='還沒有比你慢的車友資料，要先採集。';return}
- var N={m:'11/14 你實際踩的瓦數（只有騎過的賽段）',l:'每段都有一位成績剛好比你快一點的車友；數字是你要踩多少才追得上，小字是比你近況多多少瓦',a:'要追上 Alan 今年最佳，每段得踩多少；※ 超出曲線可信範圍，只當參考'};note.textContent=N[V];
- D.segments.forEach(function(s){var c=s.v[V];if(!c)return;var r=s.v.r,diff=(V!=='m'&&r)?c.w-r.w:null;
-  var d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center;padding:6px 10px;margin:4px 0;border-left:10px solid '+ZB[c.z]+';background:#141416';
-  d.innerHTML='<div><div style="font-size:22px;font-weight:700">'+s.name+'</div><div style="font-size:16px;color:#bdbdbd">'+s.km+' km'+(s.leg?'・'+s.leg+'程':'')+'</div></div><div style="text-align:right"><div style="font-size:38px;font-weight:900;line-height:1.05;color:'+ZT[c.z]+';opacity:'+(c.ok?1:.6)+'">'+c.w+'<span style="font-size:16px"> W'+(c.ok?'':' ※')+'</span></div><div style="font-size:16px;font-weight:800;color:'+(diff==null?'#8a8a8e':diff>0?'#ff9a6a':'#6fd49d')+'">'+(diff==null?ZN[c.z]:(diff>0?'領先你 +'+diff+' W':'落後你 '+diff+' W'))+'</div></div>';seg.appendChild(d)})}
+ if(V==='b'){note.textContent='還沒有比你慢的車友資料，要先採集比你慢的人（目前資料只有比你快的車友與 Alan）。';return}
+  
+ var N={m:'11/14 你實際踩的瓦數（只有騎過的賽段）',L:'左：成績剛好比你快一點的車友；右：Alan 今年最佳。數字＝這段你要踩多少才追得上，小字＝比你近況多多少瓦（※ 超出曲線可信範圍，只當參考）'};note.textContent=N[V];
+ function cell(c,r,lab){if(!c)return '<div style="text-align:center;color:#8a8a8e;font-size:18px">—</div>';var diff=r?c.w-r.w:null;return '<div style="text-align:center"><div style="font-size:15px;color:#bdbdbd;font-weight:700">'+lab+'</div><div style="font-size:34px;font-weight:900;line-height:1.05;color:'+ZT[c.z]+';opacity:'+(c.ok?1:.6)+'">'+c.w+'<span style="font-size:14px"> W'+(c.ok?'':'※')+'</span></div>'+(diff==null?'':'<div style="font-size:15px;font-weight:800;color:'+(diff>0?'#ff9a6a':'#6fd49d')+'">'+(diff>0?'+':'')+diff+' W</div>')+'</div>'}
+ D.segments.forEach(function(s){var d=document.createElement('div'),r=s.v.r;
+  if(V==='m'){var c=s.v.m;if(!c)return;d.style.cssText='display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:center;padding:6px 10px;margin:4px 0;border-left:10px solid '+ZB[c.z]+';background:#141416';d.innerHTML='<div><div style="font-size:22px;font-weight:700">'+s.name+'</div><div style="font-size:16px;color:#bdbdbd">'+s.km+' km'+(s.leg?'・'+s.leg+'程':'')+'</div></div>'+cell(c,null,ZN[c.z])}
+  else{var c1=s.v.l,c2=s.v.a;d.style.cssText='padding:6px 10px;margin:4px 0;border-left:10px solid '+ZB[(c1||c2||{z:0}).z]+';background:#141416';d.innerHTML='<div style="font-size:21px;font-weight:700">'+s.name+' <span style="font-size:15px;color:#bdbdbd;font-weight:400">'+s.km+' km'+(s.leg?'・'+s.leg+'程':'')+'</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:4px">'+cell(c1,r,'前一名')+cell(c2,r,'Alan')+'</div>'}
+  seg.appendChild(d)})}
 draw();
 fetch('http://127.0.0.1:8790/v1/segmap').then(function(r){return r.json()}).then(function(j){if(j&&j.segments&&j.segments.length){D=j;draw()}}).catch(function(){});
 })();
