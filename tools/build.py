@@ -143,7 +143,7 @@ def convert_v2(stem: str) -> str:
         mark = 'data-r="' if stem == "Rsi" else 'data-b="'  # 「教練改了什麼」用 data-r（由 startRsi 綁定，不走 status 判讀）
         assert mark in t, f"{stem} 沒有 {mark} 綁定點"
         t, n = re.subn(r'<button id="t" type="button"[^>]*>（畫板用：切換異常）</button>\n?', "", t)
-        assert n == (0 if stem in ("Home", "Rsi") else 1), f"{stem} 切換異常鈕數量不對：{n}"
+        assert n == 0, f"{stem} 切換異常鈕數量不對：{n}"
     t = t.replace('<body>', '<body data-page="' + V2[stem] + '">', 1)
     assert t.count("</body>") == 1
     return t.replace("</body>", V2_TAIL)

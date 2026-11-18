@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1a1d">
+<title>賽段區間1118</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="layout.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+html,body{background:#0e1a1d}html.locked body>*:not(#gate){visibility:hidden}
+:root{--bg:#0e1a1d;--card:#142428;--fg:#e3eeee;--muted:#9bb0b4;--line:#2a3f44;--soft:#1b2f34;--accent:#4cc3cd;--dawn:#f0975f;--ok:#6fd49d;--warn:#f0c866;
+ --z0:#9bbac7;--z1:#25756a;--z2:#b7c24e;--z3:#f0c443;--z4:#ee8a3c;--z5:#c4392c;--z6:#7b2b5a;
+ --t0:#17292c;--t1:#fff;--t2:#17292c;--t3:#17292c;--t4:#17292c;--t5:#fff;--t6:#fff;
+ --f:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;--n:'Space Grotesk','Noto Sans TC',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--f);padding:0 max(16px,env(safe-area-inset-left)) 0 max(16px,env(safe-area-inset-right))}
+.wrap{max-width:460px;margin:0 auto;padding:20px 0 96px;display:flex;flex-direction:column;gap:18px}
+h1{font:700 26px/1.25 var(--n);margin:0;letter-spacing:.01em}h1 small{display:block;font:400 14px var(--f);color:var(--muted);margin-top:2px}
+h2{font-size:17px;margin:0 0 8px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.bar{display:flex;height:44px;border-radius:8px;overflow:hidden;gap:2px}
+.bar button{border:0;padding:0;min-width:0;font:700 12px var(--n);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.9}
+.bar button[aria-pressed=true]{outline:3px solid var(--fg);outline-offset:-3px;opacity:1}
+.ticks{display:flex;justify-content:space-between;font:12px var(--n);color:var(--muted);margin-top:4px}
+.say{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:17px;font-weight:700;line-height:1.45}
+.say small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.steps li{display:grid;grid-template-columns:62px 1fr auto;gap:8px;align-items:center;font-size:14px;padding:6px 8px;border-radius:8px;border-left:6px solid var(--c);background:var(--soft)}
+.steps b{font:700 14px var(--n)}.steps i{font:700 15px var(--n);font-style:normal;white-space:nowrap}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tabs button{min-height:48px;border:1px solid var(--line);background:var(--soft);color:var(--fg);border-radius:10px;font:700 15px var(--f);padding:6px 8px;line-height:1.25}
+.tabs button[aria-pressed=true]{background:var(--accent);color:#06181b;border-color:var(--accent)}
+.tabs button:disabled{opacity:.45}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.rows{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:end}
+.row .nm{font-size:15px;font-weight:500;min-width:0;overflow-wrap:anywhere}.row .nm small{color:var(--muted);font-size:12px;margin-left:4px}
+.row .w{font:700 20px var(--n);text-align:right}.row .w small{font-size:12px;color:var(--muted)}
+.track{grid-column:1/-1;height:14px;background:var(--soft);border-radius:7px;overflow:hidden;position:relative}
+.fill{height:100%;border-radius:7px}.fill.na{background:repeating-linear-gradient(45deg,#2a3f44 0 6px,#1b2f34 6px 12px)}.fill.ex{opacity:.55}
+.ftp{position:absolute;top:0;bottom:0;width:2px;background:var(--dawn)}
+.leg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.leg span{font:700 12px var(--n);padding:3px 8px;border-radius:6px}
+.sum{font-size:15px;margin-top:10px}.err{color:var(--warn);font-size:15px}
+.src{font-size:12px;color:var(--muted)}
+a.back{color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:#142428;border-top:3px solid var(--accent);padding-bottom:env(safe-area-inset-bottom)}
+nav a{padding:14px 0;text-align:center;color:var(--muted);text-decoration:none;font-weight:700;font-size:15px}nav a.on{color:var(--accent)}
+</style>
+<script>(function(){var h=document.documentElement;try{if(localStorage.getItem("rbc_in")!=="1")h.classList.add("locked")}catch(e){h.classList.add("locked")}})()</script>
+</head>
+<body data-page="segmap">
+<div class="wrap">
+<div><a class="back" href="ride.html">‹ 回騎乘中</a></div>
+<h1>賽段區間<small>折返點檢討用・每段該踩多少瓦、車友要踩多少</small></h1>
+
+<section class="card" aria-labelledby="h-plan">
+<h2 id="h-plan">今天課表（新塭 54 km）</h2>
+<div class="bar" id="plan" role="group" aria-label="今天課表 10 段，點一段看提示"></div>
+<div class="ticks"><span>0</span><span>13.5</span><span>27 折返</span><span>40.5</span><span>54 km</span></div>
+<div class="say" id="say" aria-live="polite">點上面一段看提示文字</div>
+<ul class="steps" id="steps"></ul>
+</section>
+
+<section class="card" aria-labelledby="h-seg">
+<h2 id="h-seg">賽段：誰要踩多少瓦</h2>
+<div class="tabs" id="tabs" role="group" aria-label="切換比較對象"></div>
+<p class="note" id="vnote"></p>
+<div class="leg" id="leg" aria-label="區間顏色"></div>
+<div class="rows" id="rows"></div>
+<p class="sum" id="sum" aria-live="polite"></p>
+<p class="src" id="src">資料：讀取中…</p>
+</section>
+</div>
+<nav><a href="index.html">今天</a><a href="start.html">出發點</a><a href="ride.html" class="on">騎乘中</a><a href="turn.html">折返點</a></nav>
+<script>
+(function(){
+var ZN=['Z1 恢復','Z2 耐力','Z3 節奏','Z4 閾值','Z5 VO2','Z6 無氧','Z7 衝刺'],ZR=['0–82','82–112','112–135','135–158','158–180','180–225','225+'];
+var FALLBACK_STEPS=[["Warm up",0,3,85,105,1,"出發暖身"],["To 7-11",3,1.8,100,118,1,"到 7-11"],["Qigu police",4.8,6,112,122,2,"七股警察局賽段　不拚"],["Lawson-Fuan",10.8,9.1,112,125,2,"萊爾富到福安宮"],["Bridge",19.9,6.1,112,122,2,"橋段　上橋不超過135W 30秒"],["Pre turn",26,1,100,115,1,"折返前"],["Back 1",27,10,105,118,2,"回程前段"],["Back 2",37,10,105,115,2,"回程中段"],["Into town",47,5,105,115,2,"進城前　別衝"],["Cool down",52,2,80,95,1,"收操"]];
+function $(i){return document.getElementById(i)}
+function zc(i){return 'var(--z'+i+')'}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+var steps=FALLBACK_STEPS.map(function(s){return{n:s[0],km0:s[1],km:s[2],lo:s[3],hi:s[4],z:s[5],note:s[6],say:s[6].split('　')[0]+' '+s[3]+'-'+s[4]+'瓦'}});
+function drawPlan(){
+  var bar=$('plan'),ul=$('steps');bar.textContent='';ul.textContent='';
+  steps.forEach(function(s,i){
+    var b=el('button','',s.hi);b.type='button';b.style.flex=s.km+' 1 0';b.style.background=zc(s.z);b.style.color='var(--t'+s.z+')';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',s.km0+' 到 '+(s.km0+s.km)+' 公里 '+s.lo+' 到 '+s.hi+' 瓦 '+s.note);
+    b.onclick=function(){pick(i)};bar.appendChild(b);
+    var li=el('li');li.style.setProperty('--c',zc(s.z));li.appendChild(el('b','',s.km0+'–'+(Math.round((s.km0+s.km)*10)/10)));
+    var m=el('span','',s.note.replace('　',' ・'));li.appendChild(m);li.appendChild(el('i','',s.lo+'–'+s.hi+' W'));li.onclick=function(){pick(i)};ul.appendChild(li)});
+}
+function pick(i){var s=steps[i];[].forEach.call($('plan').children,function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false')});
+  var d=$('say');d.textContent='';d.appendChild(document.createTextNode(s.note.replace('　','，')+'：'+s.lo+'–'+s.hi+' W'));var sm=el('small','','第 '+(i+1)+' 段／共 '+steps.length+'・'+s.km0+' 到 '+(Math.round((s.km0+s.km)*10)/10)+' km・'+ZN[s.z]);d.appendChild(sm)}
+function drawLeg(){var l=$('leg');l.textContent='';ZN.forEach(function(n,i){var s=el('span','',n.split(' ')[0]+' '+ZR[i]);s.style.background=zc(i);s.style.color='var(--t'+i+')';l.appendChild(s)})}
+var DATA=null,VIEW='r';
+function drawTabs(){var t=$('tabs');t.textContent='';var V=DATA.views;['m','r','l','a'].forEach(function(k){if(!V[k])return;var b=el('button','',V[k]);b.type='button';b.setAttribute('aria-pressed',k===VIEW?'true':'false');b.onclick=function(){VIEW=k;drawTabs();drawRows()};t.appendChild(b)});
+  var d=el('button','','落後你的車友（資料還沒採）');d.type='button';d.disabled=true;t.appendChild(d)}
+function drawRows(){
+  var rows=$('rows');rows.textContent='';$('vnote').textContent=DATA.notes[VIEW]||'';var cnt={},ex=0,n=0;
+  DATA.segments.forEach(function(s){var c=s.v[VIEW];var r=el('div','row');var nm=el('div','nm',s.name);nm.appendChild(el('small','',s.km+' km'+(s.leg?'・'+s.leg+'程':'')));r.appendChild(nm);
+    var w=el('div','w');if(c){w.appendChild(document.createTextNode(c.w));w.appendChild(el('small','',' W'+(c.ok?'':' ※')))}else{w.appendChild(el('small','','沒騎過'))}r.appendChild(w);
+    var tr=el('div','track');var f=el('div','fill'+(c?(c.ok?'':' ex'):' na'));if(c){f.style.width=Math.min(100,c.w/260*100)+'%';f.style.background=zc(c.z);cnt[c.z]=(cnt[c.z]||0)+1;n++;if(!c.ok)ex++}else f.style.width='100%';tr.appendChild(f);
+    var fl=el('div','ftp');fl.style.left=(DATA.ftp/260*100)+'%';tr.appendChild(fl);r.appendChild(tr);rows.appendChild(r)});
+  var parts=[];Object.keys(cnt).sort().forEach(function(k){parts.push(cnt[k]+' 段 '+ZN[k])});
+  $('sum').textContent=n?('共 '+n+' 段：'+parts.join('、')+(ex?'；其中 '+ex+' 段超出你的曲線可信範圍（※），只當參考。':'。')+' 橘線是 FTP '+DATA.ftp+' W。'):'這個視角沒有資料。';
+}
+function fail(msg){$('src').textContent='';var e=el('span','err',msg);$('src').appendChild(e);$('rows').textContent='';$('sum').textContent='';$('vnote').textContent='賽段資料要在手機上、教練與樞紐在跑時才讀得到。今天課表上面照常可看。'}
+function load(){
+  var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){ctl&&ctl.abort()},3000);
+  fetch('http://127.0.0.1:8790/v1/segmap',ctl?{signal:ctl.signal}:{}).then(function(r){clearTimeout(tm);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(j){
+    if(!j.segments||!j.segments.length)return fail('樞紐有回應，但手機上還沒有賽段資料檔。');
+    DATA=j;if(j.steps&&j.steps.length){steps=j.steps}drawPlan();drawTabs();drawRows();$('src').textContent='資料來源：手機樞紐（本機）・'+new Date().toTimeString().slice(0,5)+' 讀到'
+  }).catch(function(e){clearTimeout(tm);fail('讀不到手機樞紐（'+(e&&e.name==='AbortError'?'逾時':'連不上')+'）')});
+}
+drawPlan();drawLeg();load();
+})();
+</script>
+<script src="motion.js"></script>
+<script src="swipe.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="gate.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+</body>
+</html>
