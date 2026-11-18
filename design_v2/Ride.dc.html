@@ -37,7 +37,7 @@ var note=document.getElementById('gnote'),plan=document.getElementById('gplan'),
 if(!seg)return;var D=null,mode='P',idx=0;
 var bar=document.createElement('div');bar.style.cssText='position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr 1fr 1fr;z-index:5;border-top:2px solid #2a2a2d;background:#141416';
 function mk(t){var b=document.createElement('button');b.type='button';b.textContent=t;b.style.cssText='min-height:64px;font:900 24px/1.2 inherit;border:0;border-left:1px solid #2a2a2d;color:#fff;background:#141416';bar.appendChild(b);return b}
-var bB=mk('落後 ▼'),bP=mk('我的目標'),bL=mk('領先 ▲');document.body.appendChild(bar);
+var bB=mk('◀ 落後'),bP=mk('我的目標'),bL=mk('領先 ▶');document.body.appendChild(bar);
 function paintBtn(b,on){b.style.background=on?'#4cc3cd':'#141416';b.style.color=on?'#06181b':'#fff'}
 function list(){return D?(mode==='L'?D.riders.ahead:D.riders.behind):[]}
 bL.onclick=function(){if(!D)return;if(mode==='L')idx=Math.min(list().length-1,idx+1);else{mode='L';idx=0}draw()};
