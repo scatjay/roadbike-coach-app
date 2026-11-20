@@ -84,8 +84,10 @@ function $(i){return document.getElementById(i)}
 function zc(i){return 'var(--z'+i+')'}
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 var steps=FALLBACK_STEPS.map(function(s){return{n:s[0],km0:s[1],km:s[2],lo:s[3],hi:s[4],z:s[5],note:s[6],say:s[6].split('　')[0]+' '+s[3]+'-'+s[4]+'瓦'}});
+var PL=null;
 function drawPlan(){
   var bar=$('plan'),ul=$('steps');bar.textContent='';ul.textContent='';
+  if(PL){$('h-plan').textContent='今天課表（'+PL.route+' '+PL.total_km+' km）';bar.setAttribute('aria-label','今天課表 '+steps.length+' 段，點一段看提示');var tk=document.querySelector('.ticks');if(tk){tk.innerHTML='<span>0</span><span>'+(PL.total_km/4).toFixed(1)+'</span><span>'+PL.turn_km+' 折返</span><span>'+(PL.total_km*3/4).toFixed(1)+'</span><span>'+PL.total_km+' km</span>'}}
   steps.forEach(function(s,i){
     var b=el('button','',s.hi);b.type='button';b.style.flex=s.km+' 1 0';b.style.background=zc(s.z);b.style.color='var(--t'+s.z+')';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label',s.km0+' 到 '+(s.km0+s.km)+' 公里 '+s.lo+' 到 '+s.hi+' 瓦 '+s.note);
     b.onclick=function(){pick(i)};bar.appendChild(b);
@@ -112,7 +114,7 @@ function load(){
   var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){ctl&&ctl.abort()},3000);
   fetch('http://127.0.0.1:8790/v1/segmap',ctl?{signal:ctl.signal}:{}).then(function(r){clearTimeout(tm);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(j){
     if(!j.segments||!j.segments.length)return fail('樞紐有回應，但手機上還沒有賽段資料檔。');
-    DATA=j;if(j.steps&&j.steps.length){steps=j.steps}drawPlan();drawTabs();drawRows();$('src').textContent='資料來源：手機樞紐（本機）・'+new Date().toTimeString().slice(0,5)+' 讀到'
+    DATA=j;if(j.steps&&j.steps.length){steps=j.steps;PL=j.plan||null}drawPlan();drawTabs();drawRows();$('src').textContent='資料來源：手機樞紐（本機）・'+new Date().toTimeString().slice(0,5)+' 讀到'
   }).catch(function(e){clearTimeout(tm);fail('讀不到手機樞紐（'+(e&&e.name==='AbortError'?'逾時':'連不上')+'）')});
 }
 drawPlan();drawLeg();load();

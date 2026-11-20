@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1a1d">
+<title>歷程1120</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="layout.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+html,body{background:#0e1a1d}html.locked body>*:not(#gate){visibility:hidden}
+:root{--bg:#0e1a1d;--card:#142428;--fg:#e3eeee;--muted:#9bb0b4;--line:#2a3f44;--soft:#1b2f34;--accent:#4cc3cd;--dawn:#f0975f;--ok:#6fd49d;--warn:#f0c866;
+ --z0:#9bbac7;--z1:#25756a;--z2:#b7c24e;--z3:#f0c443;--z4:#ee8a3c;--z5:#c4392c;--z6:#7b2b5a;
+ --t0:#17292c;--t1:#fff;--t2:#17292c;--t3:#17292c;--t4:#17292c;--t5:#fff;--t6:#fff;
+ --f:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;--n:'Space Grotesk','Noto Sans TC',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--f);padding:0 max(16px,env(safe-area-inset-left)) 0 max(16px,env(safe-area-inset-right))}
+.wrap{max-width:460px;margin:0 auto;padding:20px 0 96px;display:flex;flex-direction:column;gap:18px}
+h1{font:700 26px/1.25 var(--n);margin:0;letter-spacing:.01em}h1 small{display:block;font:400 14px var(--f);color:var(--muted);margin-top:2px}
+h2{font-size:17px;margin:0 0 8px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.bar{display:flex;height:44px;border-radius:8px;overflow:hidden;gap:2px}
+.bar button{border:0;padding:0;min-width:0;font:700 12px var(--n);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.9}
+.bar button[aria-pressed=true]{outline:3px solid var(--fg);outline-offset:-3px;opacity:1}
+.ticks{display:flex;justify-content:space-between;font:12px var(--n);color:var(--muted);margin-top:4px}
+.say{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:17px;font-weight:700;line-height:1.45}
+.say small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.steps li{display:grid;grid-template-columns:62px 1fr auto;gap:8px;align-items:center;font-size:14px;padding:6px 8px;border-radius:8px;border-left:6px solid var(--c);background:var(--soft)}
+.steps b{font:700 14px var(--n)}.steps i{font:700 15px var(--n);font-style:normal;white-space:nowrap}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tabs button{min-height:48px;border:1px solid var(--line);background:var(--soft);color:var(--fg);border-radius:10px;font:700 15px var(--f);padding:6px 8px;line-height:1.25}
+.tabs button[aria-pressed=true]{background:var(--accent);color:#06181b;border-color:var(--accent)}
+.tabs button:disabled{opacity:.45}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.rows{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:end}
+.row .nm{font-size:15px;font-weight:500;min-width:0;overflow-wrap:anywhere}.row .nm small{color:var(--muted);font-size:12px;margin-left:4px}
+.row .w{font:700 20px var(--n);text-align:right}.row .w small{font-size:12px;color:var(--muted)}
+.track{grid-column:1/-1;height:14px;background:var(--soft);border-radius:7px;overflow:hidden;position:relative}
+.fill{height:100%;border-radius:7px}.fill.na{background:repeating-linear-gradient(45deg,#2a3f44 0 6px,#1b2f34 6px 12px)}.fill.ex{opacity:.55}
+.ftp{position:absolute;top:0;bottom:0;width:2px;background:var(--dawn)}
+.leg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.leg span{font:700 12px var(--n);padding:3px 8px;border-radius:6px}
+.sum{font-size:15px;margin-top:10px}.err{color:var(--warn);font-size:15px}
+.src{font-size:12px;color:var(--muted)}
+a.back{color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:#142428;border-top:3px solid var(--accent);padding-bottom:env(safe-area-inset-bottom)}
+nav a{padding:14px 0;text-align:center;color:var(--muted);text-decoration:none;font-weight:700;font-size:15px}nav a.on{color:var(--accent)}
+</style>
+<style>
+.pl{margin:0}.pl summary{padding:6px 0;font-weight:700;font-size:17px;cursor:pointer}
+.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:15px;color:var(--muted)}.row b{color:var(--fg);font-weight:700}
+.leg{border-top:1px solid var(--line);padding:8px 0}.leg h3{margin:0 0 4px;font-size:16px}
+.kv{display:flex;flex-wrap:wrap;gap:4px 14px;font:700 15px var(--n)}.kv span small{font:400 12px var(--f);color:var(--muted);margin-left:2px}
+.nt{font-size:14px;color:var(--muted);margin-top:4px}.cur{color:var(--accent);font-size:13px;margin-left:6px}
+</style>
+<script>(function(){var h=document.documentElement;try{if(localStorage.getItem("rbc_in")!=="1")h.classList.add("locked")}catch(e){h.classList.add("locked")}})()</script>
+</head>
+<body data-page="history">
+<div class="wrap">
+<div><a class="back" href="ride.html">‹ 回騎乘中</a></div>
+<h1>歷程<small>歷次計畫與歷次騎乘・資料來自手機樞紐，連不上就是空的</small></h1>
+<section class="card" aria-labelledby="h-rides"><h2 id="h-rides">歷次騎乘（最新在前）</h2><div id="rides">讀取中…</div></section>
+<section class="card" aria-labelledby="h-plans"><h2 id="h-plans">歷次計畫（最新在前）</h2><div id="plans">讀取中…</div></section>
+</div>
+<script>
+function $(i){return document.getElementById(i)}
+function esc(x){return String(x).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+fetch('http://127.0.0.1:8790/v1/rides').then(function(r){return r.json()}).then(function(j){
+  var h='';(j.rides||[]).forEach(function(r){h+='<details class="pl" open><summary>'+esc(r.date.slice(5).replace('-','/'))+'　'+esc(r.route)+' '+r.km+' km<span class="cur">'+esc(r.plan||'')+'</span></summary>';
+    r.legs.forEach(function(l){h+='<div class="leg"><h3>'+esc(l.name)+'・'+l.min+' 分鐘</h3><div class="kv">'
+      +'<span>心率 '+(l.hr==null?'—':l.hr)+'<small>均'+(l.hr_max?' / 最高 '+l.hr_max:'')+'</small></span>'
+      +'<span>功率 '+(l.pw==null?'—':l.pw)+'<small>W</small></span>'
+      +'<span>速度 '+(l.spd==null?'—':l.spd)+'<small>km/h</small></span>'
+      +'<span>超線 '+(l.over146==null?'—':l.over146)+'<small>%</small></span></div>'
+      +'<div class="nt">'+esc(l.src||'')+(l.note?'・'+esc(l.note):'')+'</div></div>'});
+    h+='</details>'});
+  $('rides').innerHTML=h||'沒有資料';
+  if(j.note){var n=document.createElement('div');n.className='nt';n.textContent=j.note;$('rides').appendChild(n)}
+}).catch(function(){$('rides').textContent='讀不到手機樞紐'});
+fetch('http://127.0.0.1:8790/v1/segmap').then(function(r){return r.json()}).then(function(j){
+  var h='';(j.plans||[]).forEach(function(p){h+='<details class="pl"'+(p.current?' open':'')+'><summary>'+esc(p.date.slice(5).replace('-','/'))+'　'+esc(p.route)+' '+p.total_km+' km・'+p.steps.length+' 段'+(p.current?'<span class="cur">下一趟</span>':'')+'</summary>';
+    p.steps.forEach(function(x){h+='<div class="row"><span><b>'+esc(x.cn||x.n)+'</b> '+x.km0+'–'+(Math.round((x.km0+x.km)*10)/10)+' km</span><span>'+x.lo+'–'+x.hi+' W</span></div>'});h+='</details>'});
+  $('plans').innerHTML=h||'沒有資料';
+}).catch(function(){$('plans').textContent='讀不到手機樞紐'});
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="gate.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+</body>
+</html>
