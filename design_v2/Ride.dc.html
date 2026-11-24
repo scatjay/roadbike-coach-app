@@ -38,8 +38,8 @@ try{var sv=parseInt(localStorage.getItem('rbc_lod'),10);if(sv>=0&&sv<=2)lod=sv}c
 var ST=[[60,[59,111,182]],[100,[42,161,152]],[125,[183,194,78]],[150,[240,196,67]],[190,[238,138,60]],[250,[196,57,44]]];
 function col(w){if(w<=60)return 'rgb('+ST[0][1]+')';for(var k=1;k<ST.length;k++){if(w<=ST[k][0]){var a=ST[k-1],b=ST[k],t=(w-a[0])/(b[0]-a[0]);return 'rgb('+[0,1,2].map(function(q){return Math.round(a[1][q]+(b[1][q]-a[1][q])*t)})+')'}}return 'rgb('+ST[5][1]+')'}
 function colP(w){return col(60+(Math.max(80,Math.min(130,w))-80)*3.8)}
-var TURN=27.0;var PLAN=[["暖身",3.0,85,105,"出發暖身"],["到 7-11",1.8,100,118,"小七補給點"],["七股警察局賽段",6.0,112,122,"賽段不拚"],["萊爾富→福安宮",9.1,112,125,"預報逆風，速度慢正常"],["橋段",6.1,112,122,"上橋不超過 135 W、30 秒"],["折返前",1.0,100,115,"準備折返"],["回程前段",10.0,105,118,"心率最容易衝"],["回程中段",10.0,105,115,"累了以心率為準"],["進城前",5.0,105,115,"別衝"],["收操",2.0,80,95,""]];
-var G3=[["去程主段","3.0–26.0 km","112–125",118.5],["回程","27.0–52.0 km","105–118",111.5],["暖身・收操","0–3、52–54 km","80–105",92]];
+var TURN=27.5;var PLAN=[["暖身",4.8,85,110,"出發暖身，到 7-11"],["七股警察局賽段",6.0,125,145,"賽段不拚"],["去程：萊爾富→ZIV 7-11",3.1,130,150,"心率守 146，功率看 10 秒平均"],["去程：ZIV 7-11→萊爾富",6.0,130,150,"心率守 146，功率看 10 秒平均"],["去程：萊爾富→新塭",7.6,130,150,"心率守 146，功率看 10 秒平均"],["回程：新塭→萊爾富",7.6,125,145,"回程心率最容易衝，功率比去程低一檔"],["回程：萊爾富→ZIV 7-11",6.0,120,140,"以心率為準，功率看 10 秒平均"],["回程：ZIV 7-11→萊爾富",3.1,120,140,"以心率為準，功率看 10 秒平均"],["回程：萊爾富→7-11",6.0,120,140,"以心率為準，功率看 10 秒平均"],["進城前",1.7,100,120,"別衝"],["收操",3.1,80,95,"慢慢騎回家"]];
+var G3=[["去程主段","4.8–27.5 km","125–150",137.5],["回程","27.5–51.9 km","100–145",122.5],["暖身・收操","0–4.8、51.9–55 km","80–110",95.0]];
 var bar=document.createElement('div');bar.id='gbar';bar.style.cssText='position:sticky;top:0;z-index:5;background:#0b0b0c;padding:2px 0 6px';
 var row1=document.createElement('div');row1.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;border:2px solid #2a2a2d;background:#141416';
 function mk(t){var b=document.createElement('button');b.type='button';b.textContent=t;b.style.cssText='min-height:52px;font:900 20px/1.2 inherit;border:0;border-left:1px solid #2a2a2d;color:#fff;background:#141416';row1.appendChild(b);return b}
