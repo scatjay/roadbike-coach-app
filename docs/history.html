@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e1a1d">
-<title>歷程1120</title>
+<title>歷程1126</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="motion.css">
@@ -51,11 +51,36 @@ nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:re
 nav a{padding:14px 0;text-align:center;color:var(--muted);text-decoration:none;font-weight:700;font-size:15px}nav a.on{color:var(--accent)}
 </style>
 <style>
-.pl{margin:0}.pl summary{padding:6px 0;font-weight:700;font-size:17px;cursor:pointer}
-.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:15px;color:var(--muted)}.row b{color:var(--fg);font-weight:700}
-.leg{border-top:1px solid var(--line);padding:8px 0}.leg h3{margin:0 0 4px;font-size:16px}
-.kv{display:flex;flex-wrap:wrap;gap:4px 14px;font:700 15px var(--n)}.kv span small{font:400 12px var(--f);color:var(--muted);margin-left:2px}
-.nt{font-size:14px;color:var(--muted);margin-top:4px}.cur{color:var(--accent);font-size:13px;margin-left:6px}
+.pl{margin:0 0 14px}.pl:last-child{margin-bottom:0}
+.pl summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;padding:6px 0 10px}
+.pl summary::-webkit-details-marker{display:none}
+.pl summary .d{font:700 24px/1.2 var(--n)}
+.pl summary .r{font-size:17px;font-weight:700}
+.pl summary .k{font:700 15px var(--n);color:var(--muted)}
+.cur{color:#06181b;background:var(--accent);font-size:13px;font-weight:700;border-radius:6px;padding:1px 8px}
+.lg{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:12px;margin-top:10px}
+.lh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.lh h3{margin:0;font-size:18px;font-weight:700}
+.lh .m{font:700 15px var(--n);color:var(--muted);white-space:nowrap}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.st{display:flex;flex-direction:column;gap:0}
+.st .lb{font-size:13px;color:var(--muted);line-height:1.3}
+.st .v{font:700 28px/1.15 var(--n)}
+.st .v small{font:400 13px var(--f);color:var(--muted);margin-left:3px}
+.st .sub{font-size:13px;color:var(--muted);line-height:1.3}
+.st.hi .v{color:var(--warn)}
+.lg.rest{padding:8px 12px;background:transparent;border-style:dashed}
+.lg.rest .lh{margin-bottom:2px}.lg.rest .lh h3{font-size:16px;color:var(--muted)}
+.lg.rest .rv{font-size:14px;color:var(--muted)}
+.tag{display:inline-block;font:700 12px var(--f);color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:0 7px;margin:10px 0 0}
+.nts{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.nts li{font-size:15px;line-height:1.55;color:#cfe0e2;padding-left:14px;position:relative}
+.nts li::before{content:"";position:absolute;left:2px;top:.7em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.nt{font-size:14px;color:var(--muted);margin-top:8px}
+.prow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:0}
+.prow b{font-size:16px;font-weight:700}.prow .kmr{font-size:13px;color:var(--muted);margin-left:6px}
+.prow .w{font:700 18px var(--n);text-align:right;white-space:nowrap}.prow .w small{font:400 12px var(--f);color:var(--muted)}
 </style>
 <script>(function(){var h=document.documentElement;try{if(localStorage.getItem("rbc_in")!=="1")h.classList.add("locked")}catch(e){h.classList.add("locked")}})()</script>
 </head>
@@ -69,21 +94,35 @@ nav a{padding:14px 0;text-align:center;color:var(--muted);text-decoration:none;f
 <script>
 function $(i){return document.getElementById(i)}
 function esc(x){return String(x).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+function nv(x){return x==null?'—':x}
+function stat(lb,v,u,sub,hi){return '<div class="st'+(hi?' hi':'')+'"><span class="lb">'+lb+'</span><span class="v">'+nv(v)+(v==null?'':'<small>'+u+'</small>')+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</div>'}
+function noteLines(s){return String(s||'').split(/[；;]/).map(function(t){return t.trim()}).filter(Boolean)}
 fetch('http://127.0.0.1:8790/v1/rides').then(function(r){return r.json()}).then(function(j){
-  var h='';(j.rides||[]).forEach(function(r){h+='<details class="pl" open><summary>'+esc(r.date.slice(5).replace('-','/'))+'　'+esc(r.route)+' '+r.km+' km<span class="cur">'+esc(r.plan||'')+'</span></summary>';
-    r.legs.forEach(function(l){h+='<div class="leg"><h3>'+esc(l.name)+'・'+l.min+' 分鐘</h3><div class="kv">'
-      +'<span>心率 '+(l.hr==null?'—':l.hr)+'<small>均'+(l.hr_max?' / 最高 '+l.hr_max:'')+'</small></span>'
-      +'<span>功率 '+(l.pw==null?'—':l.pw)+'<small>W</small></span>'
-      +'<span>速度 '+(l.spd==null?'—':l.spd)+'<small>km/h</small></span>'
-      +'<span>超線 '+(l.over146==null?'—':l.over146)+'<small>%</small></span></div>'
-      +'<div class="nt">'+esc(l.src||'')+(l.note?'・'+esc(l.note):'')+'</div></div>'});
-    h+='</details>'});
+  var h='';(j.rides||[]).forEach(function(r){h+='<details class="pl" open><summary><span class="d">'+esc(r.date.slice(5).replace('-','/'))+'</span><span class="r">'+esc(r.route)+'</span><span class="k">'+r.km+' km</span>'+(r.plan?'<span class="cur">'+esc(r.plan)+'</span>':'')+'</summary><div class="ctn">';
+    r.legs.forEach(function(l){
+      var rest=/休息/.test(l.name||'')||(l.pw===0&&l.spd===0);
+      var lines=noteLines(l.note);
+      if(rest){
+        h+='<div class="lg rest"><div class="lh"><h3>'+esc(l.name)+'</h3><span class="m">'+l.min+' 分鐘</span></div>'
+          +'<div class="rv">心率 '+nv(l.hr)+' 均'+(l.hr_max?'／最高 '+l.hr_max:'')+'</div>'
+          +(l.src?'<span class="tag">'+esc(l.src)+'</span>':'')
+          +(lines.length?'<ul class="nts">'+lines.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>':'')+'</div>';
+        return}
+      var hot=l.hr!=null&&l.hr>146;
+      h+='<div class="lg"><div class="lh"><h3>'+esc(l.name)+'</h3><span class="m">'+l.min+' 分鐘</span></div><div class="sg">'
+        +stat('心率',l.hr,'均',l.hr_max?'最高 '+l.hr_max:'',hot)
+        +stat('功率',l.pw,'W','',false)
+        +stat('速度',l.spd,'km/h','',false)
+        +stat('超線（心率>146）',l.over146,'%','',l.over146!=null&&l.over146>50)+'</div>'
+        +(l.src?'<span class="tag">'+esc(l.src)+'</span>':'')
+        +(lines.length?'<ul class="nts">'+lines.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>':'')+'</div>'});
+    h+='</div></details>'});
   $('rides').innerHTML=h||'沒有資料';
   if(j.note){var n=document.createElement('div');n.className='nt';n.textContent=j.note;$('rides').appendChild(n)}
 }).catch(function(){$('rides').textContent='讀不到手機樞紐'});
 fetch('http://127.0.0.1:8790/v1/segmap').then(function(r){return r.json()}).then(function(j){
-  var h='';(j.plans||[]).forEach(function(p){h+='<details class="pl"'+(p.current?' open':'')+'><summary>'+esc(p.date.slice(5).replace('-','/'))+'　'+esc(p.route)+' '+p.total_km+' km・'+p.steps.length+' 段'+(p.current?'<span class="cur">下一趟</span>':'')+'</summary>';
-    p.steps.forEach(function(x){h+='<div class="row"><span><b>'+esc(x.cn||x.n)+'</b> '+x.km0+'–'+(Math.round((x.km0+x.km)*10)/10)+' km</span><span>'+x.lo+'–'+x.hi+' W</span></div>'});h+='</details>'});
+  var h='';(j.plans||[]).forEach(function(p){h+='<details class="pl"'+(p.current?' open':'')+'><summary><span class="d">'+esc(p.date.slice(5).replace('-','/'))+'</span><span class="r">'+esc(p.route)+'</span><span class="k">'+p.total_km+' km・'+p.steps.length+' 段</span>'+(p.current?'<span class="cur">下一趟</span>':'')+'</summary><div class="ctn">';
+    p.steps.forEach(function(x){h+='<div class="prow"><span><b>'+esc(x.cn||x.n)+'</b><span class="kmr">'+x.km0+'–'+(Math.round((x.km0+x.km)*10)/10)+' km</span></span><span class="w">'+x.lo+'–'+x.hi+'<small> W</small></span></div>'});h+='</div></details>'});
   $('plans').innerHTML=h||'沒有資料';
 }).catch(function(){$('plans').textContent='讀不到手機樞紐'});
 </script>
