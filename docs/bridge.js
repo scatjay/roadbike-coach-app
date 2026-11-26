@@ -34,6 +34,10 @@
   var COLORS = { green: '#c6ff00', gray: '#bdbdbd', red: '#ff8a5c' };
   var SYM = { green: '✓', gray: '？', red: '✕' };
   var SEP = '　'; // 全形空白：主訊息兩段的分隔
+  /* 樞紐啟動指令：hub.py 由 update.sh 部署到手機 Termux 的 ~/ride；PATH 要帶 Termux 的 usr/bin，否則 am 廣播會失敗（11-26 實例：head_sent=false） */
+  var HUB_CMD = 'cd ~/ride && env PATH=/data/data/com.termux/files/usr/bin:$PATH python -u hub.py';
+  var HUB_FIRST = '先確認手機樞紐有沒有開';
+  var HUB_PERM = '樞紐有開仍連不到時，才是瀏覽器擋了「本機網路」：有跳出詢問請按允許，或到網站設定改成允許，再重新整理。';
 
   function num(v) { return typeof v === 'number' && isFinite(v); }
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -52,11 +56,13 @@
     timeout: '樞紐讀 RideBridge 逾時：RideBridge 可能卡住了。'
   };
 
-  function downResult(detail, st, main) {
+  function downResult(detail, st, main, extra) {
     var g = function () { return mk('gray', '不確定', ''); };
-    var m = main || '讀不到橋接';
+    var hubDown = !!(extra && extra.hubDown);
+    var m = hubDown ? HUB_FIRST : (main || '讀不到橋接');
     return {
-      main: m, mainLines: [m], level: 'gray', detail: detail || '', canPocket: false,
+      hubDown: hubDown, hint: hubDown ? (extra.hint || '') : '', hubCmd: hubDown ? HUB_CMD : '',
+      main: m, mainLines: hubDown ? ['先確認手機樞紐', '有沒有開'] : [m], level: 'gray', detail: detail || '', canPocket: false,
       riding: !!(st && st.riding === true), minimal: !!(st && st.riding === true), stale: main === '資料過舊', loading: main === '讀取中…',
       items: { coach: g(), sensor: g(), band: g(), headunit: g() },
       cadence: mk('gray', '不確定', ''),
@@ -68,7 +74,7 @@
   /** 把 /v1/status 的內容讀成判讀物件。st=null 表示根本沒拿到；opts.nowS（秒）有給才做「過舊」判斷。 */
   function judge(st, opts) {
     opts = opts || {};
-    if (!st || typeof st !== 'object') return downResult(opts.error || '沒有拿到樞紐回應。', null, opts.loading ? '讀取中…' : undefined);
+    if (!st || typeof st !== 'object') return downResult(opts.error || '沒有拿到樞紐回應。', null, opts.loading ? '讀取中…' : undefined, opts.hubDown ? { hubDown: true, hint: opts.hint } : null);
     if (st.schema !== 1) return downResult('樞紐回應格式不對（schema 不是 1），這個頁面讀不了。', st);
 
     var drift = (num(opts.nowS) && num(st.t)) ? Math.max(0, opts.nowS - st.t) : 0;
@@ -191,14 +197,17 @@
     if (e && e.code && e.human) return e;
     var where = url || '本機樞紐';
     if (e && e.name === 'AbortError') {
-      return bridgeError('timeout', '樞紐 ' + Math.round((timeoutMs || 2000) / 1000) + ' 秒內沒回應。請確認手機上的樞紐有在跑，而且這個頁面是開在同一支手機上。');
+      var e1 = bridgeError('timeout', HUB_FIRST + '：樞紐 ' + Math.round((timeoutMs || 2000) / 1000) + ' 秒內沒回應。這個頁面要開在同一支手機上。啟動指令（Termux）：' + HUB_CMD);
+      e1.hub = true; e1.hint = '';
+      return e1;
     }
     if (e && e.name === 'SyntaxError') {
       return bridgeError('badjson', '樞紐回的不是 JSON，可能是別的程式占了這個埠。');
     }
     if (e && e.name === 'TypeError') { // 連不上、被瀏覽器擋（含 Chrome 本機網路權限被拒）都是 TypeError，瀏覽器不告訴我們是哪一種
-      return bridgeError('blocked', '連不到 ' + where + '。可能是樞紐沒啟動，或瀏覽器擋了「存取本機網路」：' +
-        '若有跳出詢問請按允許，或到網站設定把本機網路存取改成允許，再重新整理。');
+      var e2 = bridgeError('blocked', HUB_FIRST + '：連不到 ' + where + '。啟動指令（Termux）：' + HUB_CMD + '。' + HUB_PERM);
+      e2.hub = true; e2.hint = HUB_PERM;
+      return e2;
     }
     return bridgeError('unknown', '讀取失敗：' + (e && e.message ? e.message : String(e)));
   }
@@ -292,7 +301,38 @@
       } else if (R.level !== 'red') m.classList.remove('m-pulse');
       ctx.lastMainKey = R.main;
     }
-    if ((m = q('detail'))) { m.textContent = R.detail; show(m, !!R.detail && !R.minimal); }
+    if ((m = q('detail'))) {
+      var hubCmdEl = d.getElementById('rb-hubcmd'), hubHintEl = d.getElementById('rb-hubhint');
+      if (R.hubDown) {
+        m.textContent = '在手機 Termux 貼上這行，再重新整理：';
+        if (!hubCmdEl) {
+          hubCmdEl = d.createElement('div'); hubCmdEl.id = 'rb-hubcmd'; hubCmdEl.setAttribute('data-b-full', '1');
+          hubCmdEl.style.cssText = 'font:600 17px/1.4 ui-monospace,Consolas,monospace;color:#ffffff;background:#141416;border:2px solid #3a3a3d;padding:8px 10px;word-break:break-all;user-select:all;-webkit-user-select:all';
+          m.parentNode.insertBefore(hubCmdEl, m.nextSibling);
+        }
+        hubCmdEl.textContent = R.hubCmd; hubCmdEl.style.display = '';
+        if (!hubHintEl) {
+          hubHintEl = d.createElement('div'); hubHintEl.id = 'rb-hubhint'; hubHintEl.setAttribute('data-b-full', '1');
+          hubHintEl.style.cssText = 'font-size:15px;line-height:1.4;color:#8a8a8e';
+          hubCmdEl.parentNode.insertBefore(hubHintEl, hubCmdEl.nextSibling);
+        }
+        hubHintEl.textContent = R.hint; hubHintEl.style.display = R.hint ? '' : 'none';
+        show(m, true);
+      } else {
+        if (hubCmdEl) hubCmdEl.style.display = 'none';
+        if (hubHintEl) hubHintEl.style.display = 'none';
+        m.textContent = R.detail; show(m, !!R.detail && !R.minimal);
+      }
+    }
+    if ((m = q('hub-lamp'))) {
+      var lv = R.loading ? 'gray' : R.hubOk ? 'green' : 'red';
+      var lt = m.querySelector('[data-b-lt]'), ls = m.querySelector('[data-b-ls]'), dot = m.querySelector('[data-b-dot]');
+      var col = lv === 'green' ? COLORS.green : lv === 'red' ? COLORS.red : COLORS.gray;
+      if (lt) { lt.textContent = lv === 'green' ? '✓ 樞紐活著' : lv === 'red' ? '✕ 樞紐沒開' : '？確認樞紐'; lt.style.color = col; }
+      if (ls) ls.textContent = lv === 'green' ? '更新 ' + (R.hubAt || '') : lv === 'red' ? '指令在下方' : '讀取中…';
+      if (dot) dot.style.background = col;
+      m.style.borderColor = col;
+    }
     ['coach', 'sensor', 'band', 'headunit'].forEach(function (k) { var el = q('row-' + k); if (el) renderRow(el, R.items[k]); });
     if ((m = q('details'))) {
       var attention = ['coach', 'sensor', 'headunit'].some(function (k) { return R.items[k].level !== 'green'; });
@@ -305,7 +345,7 @@
     if ((m = q('turn-sub'))) { m.textContent = R.turn.sub; show(m, !!R.turn.sub); }
     if ((m = q('turn-act'))) show(m, R.turn.needAct && !R.minimal, 'flex');
     if ((m = q('home-strip'))) {
-      var l1 = R.loading ? '橋接：讀取中' : R.stale ? '橋接：資料過舊' : R.main === '讀不到橋接' ? '橋接：讀不到' : R.riding ? '騎乘中 · ' + R.ride.title : '橋接：連著';
+      var l1 = R.loading ? '橋接：讀取中' : R.stale ? '橋接：資料過舊' : (R.main === '讀不到橋接' || R.hubDown) ? '橋接：讀不到' : R.riding ? '騎乘中 · ' + R.ride.title : '橋接：連著';
       m.textContent = '';
       var a = d.createElement('span'); a.textContent = l1; a.style.color = COLORS[R.level === 'green' ? 'green' : R.level];
       m.appendChild(a);
@@ -361,11 +401,14 @@
       inflight = true;
       prov.fetch().then(function (st) {
         var R = judge(st, { nowS: prov.name === 'local' ? Date.now() / 1000 : undefined });
+        R.hubOk = !!(st && typeof st === 'object'); R.hubAt = hhmmss(new Date());
         paint(R, '資料來源：' + label + (prov.scenario ? '（情境 ' + prov.scenario + '）' : '') + (prov.scenarioNote || '') +
           (prov.name === 'local' ? ' · 更新於 ' + hhmmss(new Date()) : '') + note);
       }, function (e) {
         var human = e && e.human ? e.human : '讀取失敗：' + (e && e.message ? e.message : e);
-        paint(judge(null, { error: human }), '資料來源：' + label + ' · 讀取失敗 ' + hhmmss(new Date()) + note);
+        var Rf = judge(null, { error: human, hubDown: !!(e && e.hub && prov.name === 'local'), hint: e && e.hint });
+        Rf.hubOk = false;
+        paint(Rf, '資料來源：' + label + ' · 讀取失敗 ' + hhmmss(new Date()) + note);
       }).then(function () {
         inflight = false;
         if (prov.poll && !stopped && !d.hidden) timer = setTimeout(tick, prov.intervalMs);
@@ -646,7 +689,7 @@
         return Promise.resolve().then(function () { return f(pairUrl); }).then(function (r) { return r && r.ok ? r.json() : null; }).then(function (j) { return (j && j.token) || ''; }, function () { return ''; });
       }
       function post(t) {
-        var ctl = root.AbortController ? new root.AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 6000) : null;
+        var ctl = root.AbortController ? new root.AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 10000) : null;
         return f(HEAD_SAY_URL, {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t },
           body: JSON.stringify({ kind: 'check' }), signal: ctl ? ctl.signal : undefined
@@ -659,9 +702,11 @@
       return Promise.resolve(tok || autoPair()).then(function (t0) {
         if (!t0) { t0 = ((pr && pr('自動配對失敗。貼上手機 hub_pair.txt 裡的配對碼（只問這一次，記在這支手機上）')) || '').trim(); }
         if (!t0) { show('沒有配對碼，沒有送出。', true); return false; }
+        show('已送出，確認中…', false);
         return post(t0).then(function (o) {
           if (o.s === 401) {  // 碼過期（樞紐重啟會換碼）：清掉舊的，自動重新配對一次
             try { st && st.removeItem('rbc_tok'); } catch (x) {}
+            show('已送出，確認中…', false);
             return autoPair().then(function (t1) { return t1 ? post(t1).then(function (o2) { return { o: o2, t: t1 }; }) : { o: o, t: '' }; });
           }
           return { o: o, t: t0 };
@@ -672,7 +717,7 @@
           show(m.text, m.bad); return !m.bad;
         });
       }).then(function (okv) { if (btn) btn.disabled = false; return okv; },
-        function () { if (btn) btn.disabled = false; show('連不到手機樞紐，沒有送出。（樞紐沒開，或瀏覽器擋了本機連線）', true); return false; });
+        function () { if (btn) btn.disabled = false; show('連不到手機樞紐，沒有送出。' + HUB_FIRST + '：Termux 貼上 ' + HUB_CMD + '（次要：瀏覽器擋本機網路也會這樣）', true); return false; });
     }
   };
 
